@@ -1,0 +1,371 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Alfred Script Filter Feedback",
+  "description": "JSON format for Alfred Script Filter feedback items",
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "description": "Array of items to display in Alfred",
+      "items": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "string",
+            "description": "Unique identifier for the item (optional but recommended)"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title displayed in Alfred (required)"
+          },
+          "subtitle": {
+            "type": "string",
+            "description": "The subtitle displayed below the title"
+          },
+          "arg": {
+            "type": "string",
+            "description": "The argument passed to the next action when item is selected"
+          },
+          "valid": {
+            "type": "boolean",
+            "description": "Whether the item can be actioned (true) or is just informational (false)",
+            "default": true
+          },
+          "match": {
+            "type": "string",
+            "description": "Text used for filtering/searching (if different from title)"
+          },
+          "autocomplete": {
+            "type": "string",
+            "description": "Text auto-completed when user presses Tab"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["default", "file", "file:skipcheck"],
+            "description": "Type of item"
+          },
+          "mods": {
+            "type": "object",
+            "description": "Modifier key configurations",
+            "properties": {
+              "alt": {
+                "$ref": "#/definitions/modifier"
+              },
+              "cmd": {
+                "$ref": "#/definitions/modifier"
+              },
+              "ctrl": {
+                "$ref": "#/definitions/modifier"
+              },
+              "shift": {
+                "$ref": "#/definitions/modifier"
+              },
+              "fn": {
+                "$ref": "#/definitions/modifier"
+              }
+            }
+          },
+          "text": {
+            "type": "object",
+            "description": "Text for copying",
+            "properties": {
+              "copy": {
+                "type": "string",
+                "description": "Text copied to clipboard with Cmd+C"
+              },
+              "largetype": {
+                "type": "string",
+                "description": "Text shown in large type with Cmd+L"
+              }
+            }
+          },
+          "quicklookurl": {
+            "type": "string",
+            "description": "URL for Quick Look preview"
+          },
+          "icon": {
+            "type": "object",
+            "description": "Icon configuration",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["fileicon", "filetype"],
+                "description": "Type of icon"
+              },
+              "path": {
+                "type": "string",
+                "description": "Path to icon file or system icon"
+              }
+            }
+          }
+        },
+        "required": ["title"]
+      }
+    },
+    "variables": {
+      "type": "object",
+      "description": "Variables to pass to downstream workflow objects"
+    }
+  },
+  "definitions": {
+    "modifier": {
+      "type": "object",
+      "properties": {
+        "valid": {
+          "type": "boolean",
+          "description": "Whether this modifier makes item actionable"
+        },
+        "arg": {
+          "type": "string",
+          "description": "Argument passed when this modifier is held"
+        },
+        "subtitle": {
+          "type": "string",
+          "description": "Subtitle shown when this modifier is held"
+        },
+        "icon": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "description": "Simple event preview",
+      "data": {
+        "items": [
+          {
+            "uid": "event-preview-1",
+            "title": "Team Meeting",
+            "subtitle": "Tomorrow at 2:00 PM - 3:00 PM • Work Calendar",
+            "arg": "{\"type\":\"event\",\"data\":{\"title\":\"Team Meeting\",\"start\":\"2024-01-16T14:00:00\",\"end\":\"2024-01-16T15:00:00\",\"calendar\":\"Work\"}}",
+            "valid": true,
+            "icon": {
+              "path": "icons/calendar.png"
+            },
+            "text": {
+              "copy": "Team Meeting - Tomorrow at 2:00 PM",
+              "largetype": "Team Meeting\nTomorrow at 2:00 PM - 3:00 PM\nWork Calendar"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "Reminder preview",
+      "data": {
+        "items": [
+          {
+            "uid": "reminder-preview-1",
+            "title": "Buy groceries",
+            "subtitle": "Today at 6:00 PM • Priority: High • Tasks List",
+            "arg": "{\"type\":\"reminder\",\"data\":{\"title\":\"Buy groceries\",\"due\":\"2024-01-15T18:00:00\",\"priority\":3,\"list\":\"Tasks\"}}",
+            "valid": true,
+            "icon": {
+              "path": "icons/reminder.png"
+            },
+            "mods": {
+              "alt": {
+                "valid": true,
+                "arg": "{\"type\":\"reminder\",\"action\":\"edit\",\"data\":{\"title\":\"Buy groceries\"}}",
+                "subtitle": "Edit before creating"
+              },
+              "cmd": {
+                "valid": true,
+                "arg": "{\"type\":\"reminder\",\"action\":\"copy\",\"data\":{\"title\":\"Buy groceries\"}}",
+                "subtitle": "Copy to clipboard"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "Multiple calendar selection",
+      "data": {
+        "items": [
+          {
+            "uid": "calendar-work",
+            "title": "Work",
+            "subtitle": "Default calendar for work events",
+            "arg": "Work",
+            "valid": true,
+            "icon": {
+              "type": "fileicon",
+              "path": "/System/Applications/Calendar.app"
+            }
+          },
+          {
+            "uid": "calendar-personal",
+            "title": "Personal",
+            "subtitle": "Personal events and appointments",
+            "arg": "Personal",
+            "valid": true,
+            "icon": {
+              "type": "fileicon",
+              "path": "/System/Applications/Calendar.app"
+            }
+          },
+          {
+            "uid": "calendar-family",
+            "title": "Family",
+            "subtitle": "Family events and gatherings",
+            "arg": "Family",
+            "valid": true,
+            "icon": {
+              "type": "fileicon",
+              "path": "/System/Applications/Calendar.app"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "Error message",
+      "data": {
+        "items": [
+          {
+            "uid": "error-no-api-key",
+            "title": "No API key configured",
+            "subtitle": "Press Enter to open configuration",
+            "arg": "config",
+            "valid": true,
+            "icon": {
+              "path": "icons/error.png"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "Parsing in progress",
+      "data": {
+        "items": [
+          {
+            "uid": "parsing",
+            "title": "Parsing your request...",
+            "subtitle": "Using OpenAI GPT-4",
+            "valid": false,
+            "icon": {
+              "path": "icons/loading.png"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "Recent items list",
+      "data": {
+        "items": [
+          {
+            "uid": "recent-1",
+            "title": "Team Meeting",
+            "subtitle": "Event • Created 2 minutes ago • Work Calendar",
+            "arg": "{\"action\":\"undo\",\"item_id\":\"ABC123\"}",
+            "valid": true,
+            "icon": {
+              "path": "icons/calendar.png"
+            },
+            "mods": {
+              "cmd": {
+                "valid": true,
+                "arg": "{\"action\":\"delete\",\"item_id\":\"ABC123\"}",
+                "subtitle": "Delete this event"
+              }
+            }
+          },
+          {
+            "uid": "recent-2",
+            "title": "Buy groceries",
+            "subtitle": "Reminder • Created 1 hour ago • Tasks List",
+            "arg": "{\"action\":\"undo\",\"item_id\":\"DEF456\"}",
+            "valid": true,
+            "icon": {
+              "path": "icons/reminder.png"
+            },
+            "mods": {
+              "cmd": {
+                "valid": true,
+                "arg": "{\"action\":\"delete\",\"item_id\":\"DEF456\"}",
+                "subtitle": "Delete this reminder"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "Configuration options",
+      "data": {
+        "items": [
+          {
+            "uid": "config-provider",
+            "title": "AI Provider",
+            "subtitle": "Current: OpenAI • Press Enter to change",
+            "arg": "{\"config\":\"provider\"}",
+            "valid": true,
+            "icon": {
+              "path": "icons/ai.png"
+            }
+          },
+          {
+            "uid": "config-model",
+            "title": "AI Model",
+            "subtitle": "Current: gpt-4-turbo • Press Enter to change",
+            "arg": "{\"config\":\"model\"}",
+            "valid": true,
+            "icon": {
+              "path": "icons/model.png"
+            }
+          },
+          {
+            "uid": "config-calendar",
+            "title": "Default Calendar",
+            "subtitle": "Current: Work • Press Enter to change",
+            "arg": "{\"config\":\"calendar\"}",
+            "valid": true,
+            "icon": {
+              "path": "icons/calendar.png"
+            }
+          },
+          {
+            "uid": "config-list",
+            "title": "Default Reminder List",
+            "subtitle": "Current: Tasks • Press Enter to change",
+            "arg": "{\"config\":\"list\"}",
+            "valid": true,
+            "icon": {
+              "path": "icons/reminder.png"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "Recurring event preview",
+      "data": {
+        "items": [
+          {
+            "uid": "recurring-event-1",
+            "title": "Weekly Standup",
+            "subtitle": "Every Monday at 9:00 AM - 9:30 AM • Work Calendar • Repeats weekly",
+            "arg": "{\"type\":\"event\",\"data\":{\"title\":\"Weekly Standup\",\"recurrence\":\"weekly\",\"start\":\"2024-01-22T09:00:00\",\"end\":\"2024-01-22T09:30:00\"}}",
+            "valid": true,
+            "icon": {
+              "path": "icons/recurring.png"
+            },
+            "text": {
+              "copy": "Weekly Standup - Every Monday at 9:00 AM",
+              "largetype": "Weekly Standup\nEvery Monday at 9:00 AM - 9:30 AM\nWork Calendar\nRepeats weekly"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

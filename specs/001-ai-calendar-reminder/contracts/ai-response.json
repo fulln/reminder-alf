@@ -1,0 +1,519 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AI Parse Response",
+  "description": "Expected response format from AI services for parsing natural language into events/reminders",
+  "type": "object",
+  "required": ["type", "confidence"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["event", "reminder", "unknown"],
+      "description": "Type of item being created"
+    },
+    "event": {
+      "type": ["object", "null"],
+      "description": "Event data (only if type is 'event')",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Event title",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "start_date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Event start date/time in ISO 8601 format"
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Event end date/time in ISO 8601 format"
+        },
+        "location": {
+          "type": ["string", "null"],
+          "description": "Event location",
+          "maxLength": 255
+        },
+        "notes": {
+          "type": ["string", "null"],
+          "description": "Additional event notes"
+        },
+        "calendar_name": {
+          "type": ["string", "null"],
+          "description": "Target calendar name"
+        },
+        "all_day": {
+          "type": "boolean",
+          "description": "Whether this is an all-day event",
+          "default": false
+        },
+        "url": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "description": "Associated URL (meeting link, etc.)"
+        },
+        "recurrence_frequency": {
+          "type": ["string", "null"],
+          "enum": ["daily", "weekly", "monthly", "yearly", null],
+          "description": "How often the event recurs"
+        },
+        "recurrence_interval": {
+          "type": "integer",
+          "description": "Repeat every N periods (e.g., every 2 weeks)",
+          "minimum": 1,
+          "default": 1
+        },
+        "recurrence_end_date": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "When recurrence should end (ISO 8601)"
+        },
+        "alert_minutes_before": {
+          "type": ["integer", "null"],
+          "description": "Alert/notification time in minutes before event",
+          "minimum": 0
+        }
+      },
+      "required": ["title", "start_date", "end_date"],
+      "additionalProperties": false
+    },
+    "reminder": {
+      "type": ["object", "null"],
+      "description": "Reminder data (only if type is 'reminder')",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Reminder title",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "notes": {
+          "type": ["string", "null"],
+          "description": "Additional reminder notes"
+        },
+        "due_date": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "When reminder is due (ISO 8601)"
+        },
+        "priority": {
+          "type": "integer",
+          "description": "Priority level (0=None, 1=Low, 2=Medium, 3=High)",
+          "enum": [0, 1, 2, 3],
+          "default": 0
+        },
+        "list_name": {
+          "type": ["string", "null"],
+          "description": "Target reminder list name"
+        },
+        "url": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "description": "Associated URL"
+        },
+        "recurrence_frequency": {
+          "type": ["string", "null"],
+          "enum": ["daily", "weekly", "monthly", "yearly", null],
+          "description": "How often the reminder recurs"
+        },
+        "recurrence_interval": {
+          "type": "integer",
+          "description": "Repeat every N periods",
+          "minimum": 1,
+          "default": 1
+        },
+        "recurrence_end_date": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "When recurrence should end (ISO 8601)"
+        }
+      },
+      "required": ["title"],
+      "additionalProperties": false
+    },
+    "confidence": {
+      "type": "number",
+      "description": "Confidence score of the parse (0.0 to 1.0)",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "ambiguities": {
+      "type": "array",
+      "description": "List of ambiguous elements in the parse",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "type": { "const": "event" },
+        "event": { "type": "object" },
+        "reminder": { "type": "null" }
+      },
+      "required": ["event"]
+    },
+    {
+      "properties": {
+        "type": { "const": "reminder" },
+        "event": { "type": "null" },
+        "reminder": { "type": "object" }
+      },
+      "required": ["reminder"]
+    },
+    {
+      "properties": {
+        "type": { "const": "unknown" },
+        "event": { "type": "null" },
+        "reminder": { "type": "null" }
+      }
+    }
+  ],
+  "examples": [
+    {
+      "description": "Simple event",
+      "data": {
+        "type": "event",
+        "event": {
+          "title": "Team Meeting",
+          "start_date": "2024-01-16T14:00:00-08:00",
+          "end_date": "2024-01-16T15:00:00-08:00",
+          "location": null,
+          "notes": null,
+          "calendar_name": null,
+          "all_day": false,
+          "url": null,
+          "recurrence_frequency": null,
+          "recurrence_interval": 1,
+          "recurrence_end_date": null,
+          "alert_minutes_before": null
+        },
+        "reminder": null,
+        "confidence": 0.95,
+        "ambiguities": []
+      }
+    },
+    {
+      "description": "Event with location and duration",
+      "data": {
+        "type": "event",
+        "event": {
+          "title": "Lunch with John",
+          "start_date": "2024-01-23T12:00:00-08:00",
+          "end_date": "2024-01-23T13:30:00-08:00",
+          "location": "Downtown Cafe",
+          "notes": null,
+          "calendar_name": null,
+          "all_day": false,
+          "url": null,
+          "recurrence_frequency": null,
+          "recurrence_interval": 1,
+          "recurrence_end_date": null,
+          "alert_minutes_before": 30
+        },
+        "reminder": null,
+        "confidence": 0.90,
+        "ambiguities": []
+      }
+    },
+    {
+      "description": "All-day event",
+      "data": {
+        "type": "event",
+        "event": {
+          "title": "Vacation",
+          "start_date": "2024-12-20T00:00:00-08:00",
+          "end_date": "2024-12-25T23:59:59-08:00",
+          "location": "Hawaii",
+          "notes": null,
+          "calendar_name": "Personal",
+          "all_day": true,
+          "url": null,
+          "recurrence_frequency": null,
+          "recurrence_interval": 1,
+          "recurrence_end_date": null,
+          "alert_minutes_before": 1440
+        },
+        "reminder": null,
+        "confidence": 0.95,
+        "ambiguities": []
+      }
+    },
+    {
+      "description": "Recurring weekly event",
+      "data": {
+        "type": "event",
+        "event": {
+          "title": "Weekly Standup",
+          "start_date": "2024-01-22T09:00:00-08:00",
+          "end_date": "2024-01-22T09:30:00-08:00",
+          "location": null,
+          "notes": null,
+          "calendar_name": "Work",
+          "all_day": false,
+          "url": "https://zoom.us/j/123456789",
+          "recurrence_frequency": "weekly",
+          "recurrence_interval": 1,
+          "recurrence_end_date": null,
+          "alert_minutes_before": 15
+        },
+        "reminder": null,
+        "confidence": 0.95,
+        "ambiguities": []
+      }
+    },
+    {
+      "description": "Event with notes and custom alert",
+      "data": {
+        "type": "event",
+        "event": {
+          "title": "Project Review",
+          "start_date": "2024-01-19T15:00:00-08:00",
+          "end_date": "2024-01-19T16:30:00-08:00",
+          "location": "Conference Room B",
+          "notes": "Prepare slides and demo. Review Q4 metrics.",
+          "calendar_name": "Work",
+          "all_day": false,
+          "url": null,
+          "recurrence_frequency": null,
+          "recurrence_interval": 1,
+          "recurrence_end_date": null,
+          "alert_minutes_before": 1440
+        },
+        "reminder": null,
+        "confidence": 0.90,
+        "ambiguities": []
+      }
+    },
+    {
+      "description": "Simple reminder",
+      "data": {
+        "type": "reminder",
+        "event": null,
+        "reminder": {
+          "title": "Buy groceries",
+          "notes": null,
+          "due_date": "2024-01-15T18:00:00-08:00",
+          "priority": 0,
+          "list_name": null,
+          "url": null,
+          "recurrence_frequency": null,
+          "recurrence_interval": 1,
+          "recurrence_end_date": null
+        },
+        "confidence": 0.95,
+        "ambiguities": []
+      }
+    },
+    {
+      "description": "High priority reminder",
+      "data": {
+        "type": "reminder",
+        "event": null,
+        "reminder": {
+          "title": "Submit report",
+          "notes": "Include Q4 metrics and projections",
+          "due_date": "2024-01-19T17:00:00-08:00",
+          "priority": 3,
+          "list_name": "Work",
+          "url": null,
+          "recurrence_frequency": null,
+          "recurrence_interval": 1,
+          "recurrence_end_date": null
+        },
+        "confidence": 0.90,
+        "ambiguities": ["Exact time not specified, assuming 5pm"]
+      }
+    },
+    {
+      "description": "Reminder without due date",
+      "data": {
+        "type": "reminder",
+        "event": null,
+        "reminder": {
+          "title": "Read documentation",
+          "notes": "EventKit framework documentation",
+          "due_date": null,
+          "priority": 1,
+          "list_name": "Learning",
+          "url": "https://developer.apple.com/documentation/eventkit",
+          "recurrence_frequency": null,
+          "recurrence_interval": 1,
+          "recurrence_end_date": null
+        },
+        "confidence": 0.95,
+        "ambiguities": []
+      }
+    },
+    {
+      "description": "Recurring daily reminder",
+      "data": {
+        "type": "reminder",
+        "event": null,
+        "reminder": {
+          "title": "Take vitamins",
+          "notes": null,
+          "due_date": "2024-01-16T08:00:00-08:00",
+          "priority": 2,
+          "list_name": "Health",
+          "url": null,
+          "recurrence_frequency": "daily",
+          "recurrence_interval": 1,
+          "recurrence_end_date": null
+        },
+        "confidence": 0.95,
+        "ambiguities": []
+      }
+    },
+    {
+      "description": "Recurring weekly reminder",
+      "data": {
+        "type": "reminder",
+        "event": null,
+        "reminder": {
+          "title": "Water plants",
+          "notes": null,
+          "due_date": "2024-01-21T10:00:00-08:00",
+          "priority": 1,
+          "list_name": "Home",
+          "url": null,
+          "recurrence_frequency": "weekly",
+          "recurrence_interval": 1,
+          "recurrence_end_date": null
+        },
+        "confidence": 0.95,
+        "ambiguities": []
+      }
+    },
+    {
+      "description": "Ambiguous parse with low confidence",
+      "data": {
+        "type": "event",
+        "event": {
+          "title": "Meeting",
+          "start_date": "2024-01-16T14:00:00-08:00",
+          "end_date": "2024-01-16T15:00:00-08:00",
+          "location": null,
+          "notes": null,
+          "calendar_name": null,
+          "all_day": false,
+          "url": null,
+          "recurrence_frequency": null,
+          "recurrence_interval": 1,
+          "recurrence_end_date": null,
+          "alert_minutes_before": null
+        },
+        "reminder": null,
+        "confidence": 0.45,
+        "ambiguities": [
+          "Time '2pm' is ambiguous - could refer to today or tomorrow",
+          "No meeting subject specified",
+          "No location specified"
+        ]
+      }
+    },
+    {
+      "description": "Unparseable input",
+      "data": {
+        "type": "unknown",
+        "event": null,
+        "reminder": null,
+        "confidence": 0.0,
+        "ambiguities": [
+          "Input too vague to determine event or reminder type",
+          "Missing required information: date/time",
+          "Could not extract meaningful title"
+        ]
+      }
+    },
+    {
+      "description": "Biweekly recurring event",
+      "data": {
+        "type": "event",
+        "event": {
+          "title": "Sprint Planning",
+          "start_date": "2024-01-22T10:00:00-08:00",
+          "end_date": "2024-01-22T12:00:00-08:00",
+          "location": null,
+          "notes": "Review backlog and plan next sprint",
+          "calendar_name": "Work",
+          "all_day": false,
+          "url": null,
+          "recurrence_frequency": "weekly",
+          "recurrence_interval": 2,
+          "recurrence_end_date": null,
+          "alert_minutes_before": 30
+        },
+        "reminder": null,
+        "confidence": 0.90,
+        "ambiguities": []
+      }
+    },
+    {
+      "description": "Monthly recurring reminder with end date",
+      "data": {
+        "type": "reminder",
+        "event": null,
+        "reminder": {
+          "title": "Pay rent",
+          "notes": "Transfer to landlord account",
+          "due_date": "2024-02-01T09:00:00-08:00",
+          "priority": 3,
+          "list_name": "Finance",
+          "url": null,
+          "recurrence_frequency": "monthly",
+          "recurrence_interval": 1,
+          "recurrence_end_date": "2024-12-31T23:59:59-08:00"
+        },
+        "confidence": 0.95,
+        "ambiguities": []
+      }
+    },
+    {
+      "description": "Event with Zoom URL",
+      "data": {
+        "type": "event",
+        "event": {
+          "title": "Client Call",
+          "start_date": "2024-01-17T11:00:00-08:00",
+          "end_date": "2024-01-17T12:00:00-08:00",
+          "location": "Virtual",
+          "notes": "Discuss Q1 roadmap",
+          "calendar_name": "Work",
+          "all_day": false,
+          "url": "https://zoom.us/j/987654321",
+          "recurrence_frequency": null,
+          "recurrence_interval": 1,
+          "recurrence_end_date": null,
+          "alert_minutes_before": 10
+        },
+        "reminder": null,
+        "confidence": 0.95,
+        "ambiguities": []
+      }
+    }
+  ],
+  "validation_rules": {
+    "event": {
+      "title": "Must not be empty",
+      "dates": "end_date must be after start_date",
+      "all_day": "If true, times should be midnight",
+      "recurrence": "If recurrence_frequency is set, recurrence_interval must be >= 1",
+      "alert": "alert_minutes_before must be >= 0 if set"
+    },
+    "reminder": {
+      "title": "Must not be empty",
+      "priority": "Must be 0, 1, 2, or 3",
+      "recurrence": "If recurrence_frequency is set, recurrence_interval must be >= 1",
+      "due_date": "Should be in future (optional)"
+    },
+    "general": {
+      "confidence": "Must be between 0.0 and 1.0",
+      "type_consistency": "Only event or reminder should be set, not both",
+      "ambiguities": "Should be empty array if confidence >= 0.8"
+    }
+  }
+}

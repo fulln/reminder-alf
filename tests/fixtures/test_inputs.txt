@@ -1,0 +1,95 @@
+# Test Inputs for AI Parsing
+# Format: input text -> expected result type
+
+## English Calendar Events
+
+Meeting tomorrow at 2pm
+-> calendar_event (simple)
+
+Lunch with Sarah at Downtown Cafe on January 28th at noon
+-> calendar_event (with location)
+
+Conference from February 1st to 3rd at Convention Center
+-> calendar_event (all-day, multi-day)
+
+Team standup at 9am and client call at 2pm tomorrow
+-> multiple calendar_events
+
+## English Reminders
+
+Remind me to buy milk
+-> reminder (simple, no due date)
+
+Submit the Q4 report by January 30th at 5pm
+-> reminder (with due date and notes)
+
+URGENT: Call doctor tomorrow morning at 10am
+-> reminder (high priority with due date)
+
+Buy groceries (milk, bread, eggs), pick up dry cleaning by 6pm, and pay electricity bill by Jan 30
+-> multiple reminders
+
+## Mixed English
+
+Project review meeting on Jan 29 at 10am in Room 305, and prepare presentation slides by Jan 28
+-> calendar_event + reminder
+
+## Chinese Calendar Events
+
+明天下午3点开会
+-> calendar_event (simple)
+
+1月28日中午12点和Sarah在市中心咖啡馆吃午饭
+-> calendar_event (with location)
+
+2月1日到3日在会议中心参加会议
+-> calendar_event (all-day, multi-day)
+
+## Chinese Reminders
+
+提醒我买牛奶
+-> reminder (simple)
+
+1月30日下午5点前提交Q4报告
+-> reminder (with due date)
+
+紧急：明天上午10点给医生打电话
+-> reminder (high priority)
+
+## Mixed Chinese
+
+1月29日上午10点在305会议室开项目评审会，1月28日前准备好演示文稿
+-> calendar_event + reminder
+
+## Ambiguous Cases
+
+Meeting at 2
+-> ambiguous (which day? AM/PM?)
+
+Need to finish the report
+-> ambiguous (calendar event or reminder? when?)
+
+Call John
+-> ambiguous (reminder or event? when?)
+
+## Edge Cases
+
+Tomorrow
+-> ambiguous (what to do tomorrow?)
+
+3pm
+-> ambiguous (what event at 3pm?)
+
+Buy milk and meeting at 3pm tomorrow
+-> mixed (reminder + event)
+
+## Empty/Invalid
+
+asdfghjkl
+-> empty (random text)
+
+123456
+-> empty (just numbers)
+
+
+-> empty (whitespace only)
