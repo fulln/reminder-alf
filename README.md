@@ -1,6 +1,17 @@
 # Reminder-Alf 📅
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://github.com/fulln/reminder-alf/workflows/Build%20Alfred%20Workflow/badge.svg)](https://github.com/fulln/reminder-alf/actions)
+[![Test Coverage](https://img.shields.io/badge/coverage-55%25-green.svg)](https://github.com/fulln/reminder-alf)
+[![GitHub Release](https://img.shields.io/github/v/release/fulln/reminder-alf)](https://github.com/fulln/reminder-alf/releases)
+[![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)](https://www.apple.com/macos/)
+[![Python Version](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Alfred Version](https://img.shields.io/badge/Alfred-5%2B-purple.svg)](https://www.alfredapp.com/)
+[![GitHub Downloads](https://img.shields.io/github/downloads/fulln/reminder-alf/total)](https://github.com/fulln/reminder-alf/releases)
+
 AI-powered natural language calendar and reminder management for Alfred on macOS.
+
+[English](#english) | [中文文档](docs/PROJECT_SUMMARY_CN.md)
 
 ## Features
 
@@ -10,6 +21,18 @@ AI-powered natural language calendar and reminder management for Alfred on macOS
 - 🗑️ **Undo Support**: Track and delete created items individually or in bulk
 - 🔒 **Secure Configuration**: API keys stored in macOS Keychain
 - 🌐 **Multi-Provider**: Supports OpenAI, DeepSeek, and custom API endpoints
+
+## 📚 Documentation
+
+- **[Quick Start Guide](docs/QUICKSTART.md)** - 5-minute setup and usage
+- **[Installation Guide](docs/INSTALL_ALFRED.md)** - Detailed installation instructions
+- **[DeepSeek Setup](docs/DEEPSEEK.md)** - Configure DeepSeek AI (Chinese optimized)
+- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute to the project
+- **[Development Guide](docs/DEVELOPMENT.md)** - Developer documentation
+- **[Automation Guide](docs/AUTOMATION.md)** - CI/CD and release automation
+- **[Release Guide](docs/RELEASE.md)** - How to publish releases
+- **[Project Structure](docs/STRUCTURE.md)** - Directory and file organization
+- **[Changelog](CHANGELOG.md)** - Version history
 
 ## Requirements
 
@@ -242,11 +265,15 @@ MIT License - See LICENSE file for details
 
 ## Contributing
 
-Contributions welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new features
-4. Submit a pull request
+Contributions welcome! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+## Documentation
+
+For more information, check out the [docs](docs/) directory:
+- [Quick Start](docs/QUICKSTART.md)
+- [Installation](docs/INSTALL_ALFRED.md)
+- [Development](docs/DEVELOPMENT.md)
+- [Automation](docs/AUTOMATION.md)
 
 ## Acknowledgments
 
