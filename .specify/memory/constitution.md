@@ -1,50 +1,142 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report:
+- Version change: N/A → 1.0.0
+- Rationale: Initial constitution creation for reminder-alf project
+- Added sections:
+  * Core Principles (5 principles)
+  * API Integration Standards
+  * Development Workflow
+  * Governance
+- Templates status:
+  ✅ plan-template.md - Constitution Check section compatible
+  ✅ spec-template.md - Requirements structure compatible
+  ✅ tasks-template.md - Task organization compatible
+  ✅ All command files - No agent-specific references found
+- Follow-up TODOs: None
+-->
+
+# Reminder-Alf Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Alfred Workflow Integration
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+The plugin MUST integrate seamlessly with Alfred's workflow system:
+- Accept input via Alfred's standard input mechanisms (clipboard, selection, direct input)
+- Return structured output to Alfred for display and action
+- Follow Alfred's JSON feedback format for rich UI responses
+- Support Alfred's configuration and preferences system
+- Provide clear user feedback for all operations (success, errors, progress)
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+**Rationale**: Alfred users expect consistent behavior across workflows. Native integration patterns ensure reliability and maintainability.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. AI Processing Pipeline
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+AI content parsing MUST be reliable and accurate:
+- Use structured prompts to extract calendar events and reminders from natural language
+- Validate AI-extracted data before system integration
+- Handle ambiguous dates/times with explicit user confirmation
+- Support multiple languages if the AI model permits
+- Gracefully degrade when AI service is unavailable (offline mode or fallback)
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+**Rationale**: The core value proposition is AI-powered parsing. Accuracy and reliability are non-negotiable for user trust.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### III. macOS/iOS System Integration
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+System API integration MUST be robust and secure:
+- Use official macOS APIs (EventKit) for Calendar and Reminders access
+- Request and manage user permissions explicitly
+- Handle API failures gracefully with clear error messages
+- Respect system-level privacy and security settings
+- Support iCloud sync (events/reminders sync across devices automatically via system APIs)
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+**Rationale**: Direct system integration requires careful handling of permissions and failure modes to maintain user trust and data integrity.
+
+### IV. Error Handling & User Experience
+
+All failure modes MUST be handled explicitly:
+- Clear error messages explaining what went wrong and how to fix it
+- No silent failures - always notify the user of the outcome
+- Validation at each step: input → AI parsing → data validation → system API calls
+- Rollback capability if partial operations fail
+- Logging for debugging without exposing sensitive user data
+
+**Rationale**: Integrations with AI services and system APIs have multiple failure points. Explicit error handling prevents data loss and user frustration.
+
+### V. Simplicity & Maintainability
+
+Keep the implementation simple and focused:
+- Single-purpose modules: input handling, AI processing, system integration
+- Direct API calls over abstraction layers (no unnecessary ORMs, repositories, or frameworks)
+- Configuration via simple JSON or environment variables
+- Minimal dependencies - prefer standard library when possible
+- No premature optimization - straightforward code over clever tricks
+
+**Rationale**: Small tools benefit from simplicity. Each additional dependency is a maintenance burden and potential failure point.
+
+## API Integration Standards
+
+### AI Service Integration
+
+- Support pluggable AI providers (OpenAI, Anthropic, local models)
+- API keys stored securely in system keychain or environment variables (never in code)
+- Implement rate limiting and retry logic with exponential backoff
+- Cache AI responses when appropriate to reduce API costs
+- Provide fallback to manual parsing if AI service fails
+
+### System API Usage
+
+- Use EventKit framework for Calendar and Reminders on macOS
+- Request permissions on first use with clear explanation
+- Handle permission denied scenarios gracefully
+- Test against multiple macOS versions (support N and N-1 major versions at minimum)
+- Document required system permissions in README and setup instructions
+
+## Development Workflow
+
+### Testing Requirements
+
+Testing is OPTIONAL unless explicitly requested, but when implemented:
+- Unit tests for AI prompt construction and response parsing
+- Integration tests for EventKit API interactions (requires test Calendar/Reminders)
+- Manual testing workflow documented in quickstart.md
+- Test with various input formats (different date/time formats, languages, edge cases)
+
+### Code Quality
+
+- Use Python type hints for all public functions
+- Format with black and sort imports with isort
+- Lint with ruff or pylint
+- Keep functions small and single-purpose
+- Document non-obvious logic with inline comments (avoid restating the obvious)
+
+### Dependency Management
+
+- Use pyproject.toml for dependency specification
+- Pin major versions, allow minor/patch updates
+- Review dependencies quarterly for security updates
+- Prefer pure Python libraries over those requiring compiled extensions
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+### Amendment Process
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+Constitution changes require:
+1. Clear justification for the change
+2. Impact assessment on existing code and templates
+3. Version bump following semantic versioning
+4. Update to dependent templates and documentation
+
+### Compliance
+
+- All PRs MUST verify compliance with core principles
+- Complexity additions MUST be justified (see plan-template.md Complexity Tracking)
+- Any principle violation MUST be explicitly documented and approved
+
+### Versioning Policy
+
+- **MAJOR**: Principle removal, redefinition, or major governance change
+- **MINOR**: New principle added or section materially expanded
+- **PATCH**: Clarifications, typo fixes, non-semantic improvements
+
+**Version**: 1.0.0 | **Ratified**: 2026-01-26 | **Last Amended**: 2026-01-26

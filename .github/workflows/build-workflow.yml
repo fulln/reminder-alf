@@ -1,0 +1,83 @@
+name: Build Alfred Workflow
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+
+    - name: Run tests
+      run: |
+        python -m pytest tests/ -v --tb=short
+
+    - name: Build Alfred workflow
+      run: |
+        python build_workflow.py
+
+    - name: Get version
+      id: get_version
+      run: |
+        if [[ $GITHUB_REF == refs/tags/* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/}
+        else
+          VERSION=$(git rev-parse --short HEAD)
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Reminder-Alf-${{ steps.get_version.outputs.version }}
+        path: Reminder-Alf.alfredworkflow
+        retention-days: 30
+
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: Reminder-Alf.alfredworkflow
+        body: |
+          ## Reminder-Alf ${{ steps.get_version.outputs.version }}
+
+          ### 安装方法
+          1. 下载 `Reminder-Alf.alfredworkflow`
+          2. 双击文件导入到 Alfred
+          3. 配置 AI: `ral config set openai sk-YOUR_KEY gpt-4`
+          4. 开始使用: `ral Meeting tomorrow at 2pm`
+
+          ### 支持的 AI 提供商
+          - OpenAI (gpt-4, gpt-3.5-turbo)
+          - DeepSeek (deepseek-chat, 中文优化)
+          - Custom OpenAI-compatible endpoints
+
+          ### 文档
+          - [快速开始](https://github.com/${{ github.repository }}/blob/main/QUICKSTART.md)
+          - [DeepSeek 配置](https://github.com/${{ github.repository }}/blob/main/DEEPSEEK.md)
+          - [完整文档](https://github.com/${{ github.repository }}/blob/main/README.md)
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

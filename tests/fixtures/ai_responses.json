@@ -1,0 +1,212 @@
+{
+  "simple_event": {
+    "calendar_events": [
+      {
+        "title": "Team Meeting",
+        "start_date": "2026-01-27T14:00:00",
+        "end_date": "2026-01-27T15:00:00",
+        "location": null,
+        "notes": null,
+        "all_day": false
+      }
+    ],
+    "reminders": [],
+    "confidence": 0.95,
+    "ambiguities": []
+  },
+  "event_with_location": {
+    "calendar_events": [
+      {
+        "title": "Lunch with Sarah",
+        "start_date": "2026-01-28T12:00:00",
+        "end_date": "2026-01-28T13:00:00",
+        "location": "Downtown Cafe",
+        "notes": "Discuss project updates",
+        "all_day": false
+      }
+    ],
+    "reminders": [],
+    "confidence": 0.9,
+    "ambiguities": []
+  },
+  "all_day_event": {
+    "calendar_events": [
+      {
+        "title": "Conference",
+        "start_date": "2026-02-01T00:00:00",
+        "end_date": "2026-02-03T23:59:59",
+        "location": "Convention Center",
+        "notes": null,
+        "all_day": true
+      }
+    ],
+    "reminders": [],
+    "confidence": 0.85,
+    "ambiguities": []
+  },
+  "simple_reminder": {
+    "calendar_events": [],
+    "reminders": [
+      {
+        "title": "Buy milk",
+        "due_date": null,
+        "priority": 0,
+        "notes": null
+      }
+    ],
+    "confidence": 0.95,
+    "ambiguities": []
+  },
+  "reminder_with_due_date": {
+    "calendar_events": [],
+    "reminders": [
+      {
+        "title": "Submit report",
+        "due_date": "2026-01-30T17:00:00",
+        "priority": 2,
+        "notes": "Q4 financial report"
+      }
+    ],
+    "confidence": 0.9,
+    "ambiguities": []
+  },
+  "high_priority_reminder": {
+    "calendar_events": [],
+    "reminders": [
+      {
+        "title": "Call doctor",
+        "due_date": "2026-01-27T10:00:00",
+        "priority": 3,
+        "notes": "Schedule annual checkup"
+      }
+    ],
+    "confidence": 0.92,
+    "ambiguities": []
+  },
+  "mixed_event_and_reminder": {
+    "calendar_events": [
+      {
+        "title": "Project Review Meeting",
+        "start_date": "2026-01-29T10:00:00",
+        "end_date": "2026-01-29T11:30:00",
+        "location": "Room 305",
+        "notes": null,
+        "all_day": false
+      }
+    ],
+    "reminders": [
+      {
+        "title": "Prepare presentation slides",
+        "due_date": "2026-01-28T18:00:00",
+        "priority": 2,
+        "notes": "Include Q4 metrics"
+      }
+    ],
+    "confidence": 0.88,
+    "ambiguities": []
+  },
+  "multiple_events": {
+    "calendar_events": [
+      {
+        "title": "Morning Standup",
+        "start_date": "2026-01-27T09:00:00",
+        "end_date": "2026-01-27T09:15:00",
+        "location": null,
+        "notes": null,
+        "all_day": false
+      },
+      {
+        "title": "Client Call",
+        "start_date": "2026-01-27T14:00:00",
+        "end_date": "2026-01-27T15:00:00",
+        "location": null,
+        "notes": "Discuss requirements",
+        "all_day": false
+      }
+    ],
+    "reminders": [],
+    "confidence": 0.87,
+    "ambiguities": []
+  },
+  "multiple_reminders": {
+    "calendar_events": [],
+    "reminders": [
+      {
+        "title": "Buy groceries",
+        "due_date": null,
+        "priority": 0,
+        "notes": "Milk, bread, eggs"
+      },
+      {
+        "title": "Pick up dry cleaning",
+        "due_date": "2026-01-27T18:00:00",
+        "priority": 1,
+        "notes": null
+      },
+      {
+        "title": "Pay electricity bill",
+        "due_date": "2026-01-30T23:59:59",
+        "priority": 2,
+        "notes": null
+      }
+    ],
+    "confidence": 0.91,
+    "ambiguities": []
+  },
+  "ambiguous_input": {
+    "calendar_events": [
+      {
+        "title": "Meeting",
+        "start_date": "2026-01-27T14:00:00",
+        "end_date": "2026-01-27T15:00:00",
+        "location": null,
+        "notes": null,
+        "all_day": false
+      }
+    ],
+    "reminders": [],
+    "confidence": 0.6,
+    "ambiguities": [
+      "Time not explicitly specified, assumed 2pm",
+      "No location provided",
+      "Meeting purpose unclear"
+    ]
+  },
+  "chinese_event": {
+    "calendar_events": [
+      {
+        "title": "下午3点开会",
+        "start_date": "2026-01-27T15:00:00",
+        "end_date": "2026-01-27T16:00:00",
+        "location": "会议室A",
+        "notes": null,
+        "all_day": false
+      }
+    ],
+    "reminders": [],
+    "confidence": 0.93,
+    "ambiguities": []
+  },
+  "chinese_reminder": {
+    "calendar_events": [],
+    "reminders": [
+      {
+        "title": "买牛奶",
+        "due_date": null,
+        "priority": 0,
+        "notes": null
+      }
+    ],
+    "confidence": 0.95,
+    "ambiguities": []
+  },
+  "empty_result": {
+    "calendar_events": [],
+    "reminders": [],
+    "confidence": 0.3,
+    "ambiguities": [
+      "No clear calendar event or reminder found",
+      "Input too vague or unrelated"
+    ]
+  }
+}
