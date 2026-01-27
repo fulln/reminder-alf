@@ -2,15 +2,15 @@
 Handler for the 'clean' command.
 """
 from typing import Tuple, List
-from .feedback_builder import FeedbackBuilder
+from ..feedback_builder import FeedbackBuilder
 from ..input_handler import ParsedInput
 from ...services.eventkit_bridge import EventKitBridge
-from ..utils.logger import get_logger
+from ...utils.logger import get_logger
 
 logger = get_logger(__name__)
 
 def handle_clean_command(parsed_input: ParsedInput, feedback: FeedbackBuilder) -> FeedbackBuilder:
-    \"\"\"
+    """
     Handle the 'clean' command to remove future/incomplete tagged items.
     
     Args:
@@ -19,7 +19,7 @@ def handle_clean_command(parsed_input: ParsedInput, feedback: FeedbackBuilder) -
         
     Returns:
         FeedbackBuilder with result items
-    \"\"\"
+    """
     bridge = EventKitBridge()
     
     # Check if 'confirm' is in args

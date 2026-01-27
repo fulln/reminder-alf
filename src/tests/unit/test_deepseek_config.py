@@ -28,4 +28,4 @@ def test_deepseek_endpoint_configuration():
         config = mock_cm.save_configuration.call_args[0][0]
         
         assert config.provider == "deepseek"
-        assert config.api_endpoint == "https://api.deepseek.com/v1"
+        assert config.api_endpoint == "https://api.deepseek.com"
