@@ -131,12 +131,13 @@ Return JSON only."""
             content = response.choices[0].message.content
             return self._parse_ai_response(content, text)
 
-        except openai.AuthenticationError:
-            return ParseResult.error("Invalid API key. Please update configuration.", text)
+        except openai.AuthenticationError as e:
+            logger.error(f"Authentication failed. Url: {self.config.api_endpoint}, Key: {self.config.api_key[:4]}***")
+            return ParseResult.error(f"Invalid API key for {self.config.api_endpoint}. Please update configuration.", text)
         except openai.RateLimitError:
             return ParseResult.error("API rate limit exceeded. Try again later.", text)
         except openai.APITimeoutError:
-            return ParseResult.error("API request timed out. Check connection.", text)
+            return ParseResult.error(f"API request timed out connecting to {self.config.api_endpoint}. Check connection.", text)
         except Exception as e:
             logger.error(f"OpenAI API error: {e}")
             return ParseResult.error(f"OpenAI error: {str(e)}", text)

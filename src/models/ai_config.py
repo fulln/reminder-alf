@@ -46,11 +46,20 @@ class AIConfiguration:
     @classmethod
     def from_dict(cls, data: dict, api_key: str) -> "AIConfiguration":
         """Create from dictionary with API key from keyring."""
+        provider = data["provider"]
+        endpoint = data.get("api_endpoint", "https://api.openai.com/v1")
+        
+        if provider == "deepseek":
+            if "api.openai.com" in endpoint:
+                endpoint = "https://api.deepseek.com"
+            elif endpoint.endswith("/v1"):
+                endpoint = endpoint[:-3]
+
         return cls(
-            provider=data["provider"],
+            provider=provider,
             model=data["model"],
             api_key=api_key,
-            api_endpoint=data.get("api_endpoint", "https://api.openai.com/v1"),
+            api_endpoint=endpoint,
             temperature=data.get("temperature", 0.7),
             max_tokens=data.get("max_tokens", 1024),
             timeout=data.get("timeout", 30),
@@ -74,6 +83,6 @@ class AIConfiguration:
             provider="deepseek",
             model="deepseek-chat",
             api_key=api_key,
-            api_endpoint="https://api.deepseek.com/v1",
+            api_endpoint="https://api.deepseek.com",
         )
 
