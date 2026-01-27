@@ -28,8 +28,7 @@ reminder-alf/
 │   └── setup.sh                    # 开发环境设置
 │
 ├── ⚙️ 配置文件
-│   ├── pyproject.toml              # Python 项目配置
-│   ├── VERSION                     # 当前版本号
+│   ├── pyproject.toml              # Python 项目配置（含版本号）
 │   ├── .env.example                # 环境变量示例
 │   ├── .gitignore                  # Git 忽略配置
 │   └── .ruff.toml                  # 代码检查配置

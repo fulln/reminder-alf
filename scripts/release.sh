@@ -11,10 +11,10 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# 获取当前版本号
+# 获取当前版本号 (从 pyproject.toml 读取)
 get_current_version() {
-    if [ -f VERSION ]; then
-        cat VERSION
+    if [ -f pyproject.toml ]; then
+        grep '^version = ' pyproject.toml | head -1 | sed 's/version = "\(.*\)"/\1/'
     elif git describe --tags --abbrev=0 2>/dev/null; then
         git describe --tags --abbrev=0 | sed 's/^v//'
     else
@@ -259,13 +259,6 @@ EOF
     echo -e "${GREEN}✅ 已更新 CHANGELOG.md${NC}"
 }
 
-# 更新 VERSION 文件
-update_version_file() {
-    local version=$1
-    echo "$version" > VERSION
-    echo -e "${GREEN}✅ 已更新 VERSION 文件${NC}"
-}
-
 # 更新 pyproject.toml 中的版本号
 update_pyproject_toml() {
     local version=$1
@@ -316,7 +309,7 @@ ${YELLOW}流程:${NC}
   1. 检查工作区是否干净
   2. 从 Git commits 自动生成 changelog
   3. 升级版本号
-  4. 更新 VERSION、pyproject.toml、CHANGELOG.md
+  4. 更新 pyproject.toml、CHANGELOG.md
   5. 运行测试
   6. 构建工作流包
   7. Git commit 所有更改
@@ -403,7 +396,6 @@ main() {
 
     # 3. 更新文件
     echo -e "${YELLOW}3️⃣  更新版本文件...${NC}"
-    update_version_file "$new_version"
     update_pyproject_toml "$new_version"
     update_changelog "$new_version"
     echo ""
@@ -420,7 +412,7 @@ main() {
 
     # 5. 构建工作流
     echo -e "${YELLOW}5️⃣  构建 Alfred 工作流...${NC}"
-    if python3 build_workflow.py > /dev/null 2>&1; then
+    if python3 scripts/build_workflow.py > /dev/null 2>&1; then
         echo -e "${GREEN}✅ 工作流构建成功${NC}"
     else
         echo -e "${RED}❌ 工作流构建失败${NC}"
@@ -430,7 +422,7 @@ main() {
 
     # 6. Git commit
     echo -e "${YELLOW}6️⃣  提交更改到 Git...${NC}"
-    git add VERSION pyproject.toml CHANGELOG.md
+    git add pyproject.toml CHANGELOG.md
     git commit -m "Bump version to ${new_version}"
     echo -e "${GREEN}✅ 已创建 commit${NC}"
     echo ""

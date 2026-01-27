@@ -41,7 +41,7 @@ git commit -m "refactor: simplify config manager"
 
 脚本会自动：
 - ✅ 从 Git commits 生成 changelog
-- ✅ 更新版本号（VERSION, pyproject.toml）
+- ✅ 更新版本号（pyproject.toml）
 - ✅ 运行测试
 - ✅ 构建 Alfred workflow
 - ✅ 提交更改
@@ -197,19 +197,14 @@ GitHub Actions 触发
 
 发布时会自动更新这些文件：
 
-1. **VERSION** - 纯文本版本号
-   ```
-   1.0.1
-   ```
-
-2. **pyproject.toml** - Python 项目配置
+1. **pyproject.toml** - Python 项目配置（版本号）
    ```toml
    [project]
    name = "reminder-alf"
    version = "1.0.1"
    ```
 
-3. **CHANGELOG.md** - 变更日志
+2. **CHANGELOG.md** - 变更日志
    ```markdown
    ## [Unreleased]
 

@@ -43,11 +43,10 @@
 
 ### ⚙️ 配置文件
 
-1. **pyproject.toml** - Python 项目配置
-2. **VERSION** - 当前版本号
-3. **.env.example** - 环境变量示例
-4. **.gitignore** - Git 忽略文件
-5. **.ruff.toml** - 代码检查配置
+1. **pyproject.toml** - Python 项目配置（包含版本号）
+2. **.env.example** - 环境变量示例
+3. **.gitignore** - Git 忽略文件
+4. **.ruff.toml** - 代码检查配置
 
 ### 📦 构建产物
 
@@ -76,8 +75,7 @@ reminder-alf/
 │   └── setup.sh                    # 环境设置
 │
 ├── ⚙️ 配置
-│   ├── pyproject.toml              # Python 配置
-│   ├── VERSION                     # 版本号
+│   ├── pyproject.toml              # Python 配置（含版本号）
 │   ├── .env.example                # 环境变量示例
 │   ├── .gitignore                  # Git 忽略
 │   └── .ruff.toml                  # 代码检查
