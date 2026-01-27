@@ -19,7 +19,8 @@ import zipfile
 def create_workflow_package():
     """创建 Alfred 工作流包"""
 
-    project_root = Path(__file__).parent
+    # 脚本在 scripts/ 目录，需要回到项目根目录
+    project_root = Path(__file__).parent.parent
     workflow_dir = project_root / "workflow"
     output_file = project_root / "Reminder-Alf.alfredworkflow"
 
