@@ -42,20 +42,35 @@ def handle_config_command(parsed_input: ParsedInput, feedback: FeedbackBuilder) 
         if len(parsed_input.args) < 3:
             return feedback.add_error(
                 "Missing Arguments",
-                "Usage: rem config set <provider> <api_key> [model]",
-                "Example: rem config set openai sk-... gpt-4"
+                "Usage: ral config set <provider> <api_key> [model]",
+                "Example: ral config set deepseek sk-... deepseek-chat"
             )
 
         provider = parsed_input.args[1]
         api_key = parsed_input.args[2]
-        model = parsed_input.args[3] if len(parsed_input.args) > 3 else "gpt-4"
+        model = parsed_input.args[3] if len(parsed_input.args) > 3 else None
 
-        # Create configuration
+        # Set default model based on provider
+        if not model:
+            if provider == "openai":
+                model = "gpt-4"
+            elif provider == "deepseek":
+                model = "deepseek-chat"
+            else:
+                model = "gpt-4"
+
+        # Create configuration with correct endpoint
         config = AIConfiguration(
             provider=provider,
             model=model,
             api_key=api_key,
         )
+
+        # Set correct endpoint based on provider
+        if provider == "deepseek":
+            config.api_endpoint = "https://api.deepseek.com/v1"
+        elif provider == "openai":
+            config.api_endpoint = "https://api.openai.com/v1"
 
         # Validate
         is_valid, error_msg = config_manager.validate_credentials(config)
