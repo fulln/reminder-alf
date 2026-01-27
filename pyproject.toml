@@ -1,18 +1,35 @@
 [project]
 name = "reminder-alf"
-version = "0.1.0"
-description = "AI-powered calendar and reminder management for Alfred"
-authors = [{name = "Your Name", email = "your.email@example.com"}]
+version = "1.0.0"
+description = "AI-powered calendar and reminder management for Alfred on macOS"
+authors = [{name = "Reminder-Alf Contributors"}]
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
+keywords = ["alfred", "workflow", "calendar", "reminder", "ai", "nlp", "macos", "productivity"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Office/Business :: Scheduling",
+    "Topic :: Utilities",
+]
+
+[project.urls]
+Homepage = "https://github.com/fulln/reminder-alf"
+Repository = "https://github.com/fulln/reminder-alf"
+Documentation = "https://github.com/fulln/reminder-alf/blob/main/README.md"
+Issues = "https://github.com/fulln/reminder-alf/issues"
+Changelog = "https://github.com/fulln/reminder-alf/blob/main/CHANGELOG.md"
 
 dependencies = [
     "pyobjc-framework-EventKit>=10.0",
     "alfred-workflow>=1.39.0",
     "keyring>=24.0.0",
     "openai>=1.0.0",
-    "anthropic>=0.8.0",
     "httpx>=0.25.0",
     "python-dateutil>=2.8.0",
 ]
