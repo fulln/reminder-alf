@@ -30,7 +30,7 @@ jobs:
 
     - name: Run tests
       run: |
-        python -m pytest tests/ -v --tb=short
+        python -m pytest src/tests -v --tb=short
 
     - name: Build Alfred workflow
       run: |
