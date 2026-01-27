@@ -97,9 +97,9 @@ git push origin v1.1.0
 
 ### 触发条件
 
-✅ 推送到 `main` 或 `master` 分支
+✅ 推送到 `main` 分支
 ✅ 创建 `v*.*.*` 格式的 tag
-✅ Pull Request 到 `main` 或 `master`
+✅ Pull Request 到 `main`
 ✅ 手动触发（workflow_dispatch）
 
 ### 工作流步骤

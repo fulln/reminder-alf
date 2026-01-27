@@ -2,11 +2,11 @@ name: Build Alfred Workflow
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
     tags:
       - 'v*.*.*'
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:  # 允许手动触发
 
 jobs:

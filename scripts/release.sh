@@ -445,9 +445,9 @@ main() {
     if [ "$no_push" = false ]; then
         echo -e "${YELLOW}8️⃣  推送到远程仓库...${NC}"
 
-        # 推送 commit
-        if git push origin main 2>/dev/null || git push origin master 2>/dev/null; then
-            echo -e "${GREEN}✅ 已推送 commits${NC}"
+        # 推送 commit 到 main
+        if git push origin main; then
+            echo -e "${GREEN}✅ 已推送 commits 到 main${NC}"
         else
             echo -e "${RED}❌ 推送 commits 失败${NC}"
             exit 1
@@ -465,7 +465,7 @@ main() {
         echo -e "${YELLOW}⏭️  跳过推送 (--no-push)${NC}"
         echo ""
         echo -e "${BLUE}手动推送命令:${NC}"
-        echo "  git push origin main  # 或 master"
+        echo "  git push origin main"
         echo "  git push origin v${new_version}"
         echo ""
     fi

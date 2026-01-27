@@ -228,9 +228,9 @@ GitHub Actions 触发
 
 ### 触发条件
 
-- ✅ 推送到 `main` 或 `master` 分支
+- ✅ 推送到 `main` 分支
 - ✅ 创建 `v*.*.*` 格式的 tag（自动发布）
-- ✅ Pull Request 到主分支
+- ✅ Pull Request 到 `main` 分支
 - ✅ 手动触发
 
 ### 手动触发构建
