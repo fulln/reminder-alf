@@ -26,6 +26,9 @@ dependencies = [
     "python-dateutil>=2.8.0",
 ]
 
+[project.scripts]
+ral = "src.main:main"
+
 [project.urls]
 Homepage = "https://github.com/fulln/reminder-alf"
 Repository = "https://github.com/fulln/reminder-alf"

@@ -36,6 +36,12 @@ jobs:
       run: |
         python scripts/build_workflow.py
 
+    - name: Build Python package
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        python -m pip install --upgrade build
+        python -m build
+
     - name: Get version
       id: get_version
       run: |
@@ -58,15 +64,26 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
-        files: Reminder-Alf.alfredworkflow
+        files: |
+          Reminder-Alf.alfredworkflow
+          dist/*.whl
+          dist/*.tar.gz
         body: |
           ## Reminder-Alf ${{ steps.get_version.outputs.version }}
 
           ### 安装方法
+
+          #### 方式1: Alfred Workflow（推荐）
           1. 下载 `Reminder-Alf.alfredworkflow`
           2. 双击文件导入到 Alfred
           3. 配置 AI: `ral config set openai sk-YOUR_KEY gpt-4`
           4. 开始使用: `ral Meeting tomorrow at 2pm`
+
+          #### 方式2: Python Package
+          从 Release 下载 `.whl` 文件后安装：
+          ```bash
+          pip install reminder_alf-${{ steps.get_version.outputs.version }}-py3-none-any.whl
+          ```
 
           ### 支持的 AI 提供商
           - OpenAI (gpt-4, gpt-3.5-turbo)
