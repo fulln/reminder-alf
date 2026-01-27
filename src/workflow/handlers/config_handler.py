@@ -30,7 +30,7 @@ def handle_config_command(parsed_input: ParsedInput, feedback: FeedbackBuilder) 
             if config:
                 return feedback.add_success(
                     "✅ Configured",
-                    f"Provider: {config.provider}\nModel: {config.model}"
+                    f"Provider: {config.provider}\nModel: {config.model}\nTokens: {config.max_tokens}\nTimeout: {config.timeout}s"
                 )
         return feedback.add_warning(
             "⚠️ Not Configured",
@@ -49,6 +49,7 @@ def handle_config_command(parsed_input: ParsedInput, feedback: FeedbackBuilder) 
         provider = parsed_input.args[1]
         api_key = parsed_input.args[2]
         model = parsed_input.args[3] if len(parsed_input.args) > 3 else None
+        endpoint = parsed_input.args[4] if len(parsed_input.args) > 4 else None
 
         # Set default model based on provider
         if not model:
@@ -59,18 +60,28 @@ def handle_config_command(parsed_input: ParsedInput, feedback: FeedbackBuilder) 
             else:
                 model = "gpt-4"
 
-        # Create configuration with correct endpoint
+        # Determine endpoint
+        if not endpoint:
+            # If no explicit endpoint given
+            if provider == "deepseek":
+                endpoint = "https://api.deepseek.com"
+            elif provider == "openai":
+                endpoint = "https://api.openai.com/v1"
+            elif provider == "custom":
+                # For custom, try to preserve existing endpoint if available
+                existing_config = config_manager.get_configuration()
+                if existing_config:
+                    endpoint = existing_config.api_endpoint
+                else:
+                    endpoint = "https://api.openai.com/v1"  # Fallback default
+        
+        # Create configuration
         config = AIConfiguration(
             provider=provider,
             model=model,
             api_key=api_key,
+            api_endpoint=endpoint
         )
-
-        # Set correct endpoint based on provider
-        if provider == "deepseek":
-            config.api_endpoint = "https://api.deepseek.com/v1"
-        elif provider == "openai":
-            config.api_endpoint = "https://api.openai.com/v1"
 
         # Validate
         is_valid, error_msg = config_manager.validate_credentials(config)
@@ -91,6 +102,61 @@ def handle_config_command(parsed_input: ParsedInput, feedback: FeedbackBuilder) 
                 "Save Failed",
                 "Could not save configuration"
             )
+
+    # Set Endpoint URL
+    if parsed_input.args[0] == "endpoint":
+        if len(parsed_input.args) < 2:
+            return feedback.add_error(
+                "Missing Arguments",
+                "Usage: ral config endpoint <url>",
+                "Example: ral config endpoint https://api.deepseek.com"
+            )
+        
+        url = parsed_input.args[1]
+        config = config_manager.get_configuration()
+        if config:
+            config.api_endpoint = url
+            if config_manager.save_configuration(config):
+                return feedback.add_success("Endpoint Updated", f"URL: {url}")
+        return feedback.add_error("Update Failed", "Could not save configuration")
+
+    # Set Timeout
+    if parsed_input.args[0] == "timeout":
+        if len(parsed_input.args) < 2:
+            return feedback.add_error(
+                "Missing Arguments", 
+                "Usage: ral config timeout <seconds>"
+            )
+            
+        try:
+            timeout = int(parsed_input.args[1])
+            config = config_manager.get_configuration()
+            if config:
+                config.timeout = timeout
+                if config_manager.save_configuration(config):
+                    return feedback.add_success("Timeout Updated", f"Timeout: {timeout} seconds")
+        except ValueError:
+            return feedback.add_error("Invalid Value", "Timeout must be a number")
+        return feedback.add_error("Update Failed", "Could not save configuration")
+
+    # Set Max Tokens
+    if parsed_input.args[0] in ["tokens", "max_tokens"]:
+        if len(parsed_input.args) < 2:
+            return feedback.add_error(
+                "Missing Arguments", 
+                "Usage: ral config tokens <number>"
+            )
+            
+        try:
+            tokens = int(parsed_input.args[1])
+            config = config_manager.get_configuration()
+            if config:
+                config.max_tokens = tokens
+                if config_manager.save_configuration(config):
+                    return feedback.add_success("Tokens Updated", f"Max Tokens: {tokens}")
+        except ValueError:
+            return feedback.add_error("Invalid Value", "Tokens must be a number")
+        return feedback.add_error("Update Failed", "Could not save configuration")
 
     # Delete API key
     if parsed_input.args[0] == "delete":

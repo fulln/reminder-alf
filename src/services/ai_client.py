@@ -4,6 +4,7 @@ AI Client for parsing natural language with OpenAI/DeepSeek/custom endpoints.
 import json
 from typing import Optional, Dict, Any
 from datetime import datetime
+import time
 import openai
 import httpx
 from ..models.ai_config import AIConfiguration
@@ -21,7 +22,7 @@ class AIClient:
     def __init__(self, config: AIConfiguration):
         """
         Initialize AI client.
-
+        
         Args:
             config: AI configuration
         """
@@ -103,7 +104,7 @@ Return JSON only."""
         try:
             # OpenAI, DeepSeek, and custom endpoints all use OpenAI-compatible API
             if self.config.provider in ["openai", "deepseek", "custom"]:
-                return self._parse_with_openai(text)
+                return self._parse_with_streaming(text)
             else:
                 return ParseResult.error(
                     f"Unsupported provider: {self.config.provider}",
@@ -113,11 +114,13 @@ Return JSON only."""
             logger.error(f"AI parsing failed: {e}")
             return ParseResult.error(f"AI service error: {str(e)}", text)
 
-    def _parse_with_openai(self, text: str) -> ParseResult:
-        """Parse with OpenAI API."""
+    def _parse_with_streaming(self, text: str) -> ParseResult:
+        """Parse with OpenAI-compatible API using streaming."""
+        start_time = time.time()
         try:
             client = self._get_openai_client()
-            response = client.chat.completions.create(
+            # Always use streaming to prevent timeouts
+            stream = client.chat.completions.create(
                 model=self.config.model,
                 messages=[
                     {"role": "system", "content": self._build_system_prompt()},
@@ -125,10 +128,37 @@ Return JSON only."""
                 ],
                 temperature=self.config.temperature,
                 max_tokens=self.config.max_tokens,
+                # Pass max_completion_tokens for newer models (o1, etc.) and some providers
+                extra_body={"max_completion_tokens": self.config.max_tokens} if self.config.provider != "openai" else {},
                 response_format={"type": "json_object"},
+                stream=True, 
             )
-
-            content = response.choices[0].message.content
+            
+            content = ""
+            finish_reason = None
+            try:
+                for chunk in stream:
+                    if chunk.choices:
+                        if chunk.choices[0].delta.content:
+                            content += chunk.choices[0].delta.content
+                        if chunk.choices[0].finish_reason:
+                            finish_reason = chunk.choices[0].finish_reason
+            except Exception as stream_err:
+                logger.error(f"Stream interrupted after {len(content)} chars: {stream_err}")
+                # Don't raise, try to parse what we have
+            
+            duration = time.time() - start_time
+            logger.info(f"AI request completed in {duration:.2f}s, finish_reason: {finish_reason}, chars: {len(content)}")
+            
+            # Save raw response for debugging
+            try:
+                debug_file = "/tmp/reminder_alf_debug.json"
+                with open(debug_file, "w", encoding="utf-8") as f:
+                    f.write(content)
+                logger.info(f"Raw AI response saved to {debug_file}")
+            except Exception as e:
+                logger.error(f"Failed to save debug file: {e}")
+            
             return self._parse_ai_response(content, text)
 
         except openai.AuthenticationError as e:
@@ -137,7 +167,9 @@ Return JSON only."""
         except openai.RateLimitError:
             return ParseResult.error("API rate limit exceeded. Try again later.", text)
         except openai.APITimeoutError:
-            return ParseResult.error(f"API request timed out connecting to {self.config.api_endpoint}. Check connection.", text)
+            duration = time.time() - start_time
+            logger.error(f"API request timed out after {duration:.2f}s")
+            return ParseResult.error(f"API request timed out connecting to {self.config.api_endpoint} ({duration:.1f}s). Check connection.", text)
         except Exception as e:
             logger.error(f"OpenAI API error: {e}")
             return ParseResult.error(f"OpenAI error: {str(e)}", text)
@@ -160,16 +192,127 @@ Return JSON only."""
             elif "```" in content:
                 content = content.split("```")[1].split("```")[0].strip()
 
-            data = json.loads(content)
+            data = None
+            try:
+                data = json.loads(content)
+            except json.JSONDecodeError:
+                logger.warning("JSON parse failed, attempting to recover valid objects from truncated response")
+                # Recovery strategy: Regex extract complete JSON objects
+                import re
+                
+                data = {
+                    "calendar_events": [],
+                    "reminders": [],
+                    "ambiguities": []
+                }
+                
+                # 1. Extract calendar_events array content
+                events_match = re.search(r'"calendar_events"\s*:\s*\[(.*?)\]', content, re.DOTALL)
+                if events_match:
+                    events_str = events_match.group(1)
+                else:
+                    # If the array isn't closed, take everything after "calendar_events": [
+                    events_match_start = re.search(r'"calendar_events"\s*:\s*\[', content)
+                    if events_match_start:
+                        events_str = content[events_match_start.end():]
+                        # If reminders start, cut off there
+                        reminders_start = events_str.find('"reminders"')
+                        if reminders_start != -1:
+                            events_str = events_str[:reminders_start]
+                    else:
+                        events_str = ""
+
+                # Extract individual objects { ... }
+                # We count braces to find balanced objects
+                def extract_objects(text):
+                    objects = []
+                    brace_count = 0
+                    start_idx = -1
+                    in_string = False
+                    escape = False
+                    
+                    for i, char in enumerate(text):
+                        if in_string:
+                            if char == '"' and not escape:
+                                in_string = False
+                            elif char == '\\':
+                                escape = not escape
+                            else:
+                                escape = False
+                        else:
+                            if char == '"':
+                                in_string = True
+                            elif char == '{':
+                                if brace_count == 0:
+                                    start_idx = i
+                                brace_count += 1
+                            elif char == '}':
+                                brace_count -= 1
+                                if brace_count == 0 and start_idx != -1:
+                                    obj_str = text[start_idx:i+1]
+                                    try:
+                                        # Clean newlines in strings again just in case
+                                        obj_str_clean = re.sub(r'(?<=: ")(.*?)(?=")', lambda m: m.group(1).replace('\n', '\\n'), obj_str, flags=re.DOTALL)
+                                        objects.append(json.loads(obj_str_clean))
+                                    except:
+                                        pass # Skip invalid object
+                                    start_idx = -1
+                    return objects
+
+                data["calendar_events"] = extract_objects(events_str)
+                
+                # 2. Extract reminders (similar logic)
+                reminders_match = re.search(r'"reminders"\s*:\s*\[(.*?)\]', content, re.DOTALL)
+                if reminders_match:
+                    reminders_str = reminders_match.group(1)
+                    data["reminders"] = extract_objects(reminders_str)
+                else:
+                    # Try open-ended
+                    reminders_match_start = re.search(r'"reminders"\s*:\s*\[', content)
+                    if reminders_match_start:
+                        reminders_str = content[reminders_match_start.end():]
+                        data["reminders"] = extract_objects(reminders_str)
+                
+                # If we recovered nothing, raise error
+                if not data["calendar_events"] and not data["reminders"]:
+                     logger.error(f"Failed to recover any data. Raw: {content}")
+                     raise json.JSONDecodeError("Could not recover JSON data", content, 0)
+                
+                logger.info(f"Recovered {len(data['calendar_events'])} events and {len(data['reminders'])} reminders from truncated JSON")
+            
+            if not isinstance(data, dict):
+                 raise ValueError(f"Parsed content is not a dictionary. Got: {type(data)}")
 
             # Parse calendar events
             calendar_events = []
             for event_data in data.get("calendar_events", []):
                 try:
+                    start_str = event_data.get("start_date")
+                    end_str = event_data.get("end_date")
+                    
+                    if not isinstance(start_str, str):
+                        logger.warning(f"Skipping event with invalid start date: {event_data}")
+                        continue
+
+                    start_date = datetime.fromisoformat(start_str)
+                    
+                    # Handle missing end date
+                    if isinstance(end_str, str):
+                        try:
+                            end_date = datetime.fromisoformat(end_str)
+                        except ValueError:
+                            logger.warning(f"Invalid end date format, defaulting to 1 hour: {end_str}")
+                            from datetime import timedelta
+                            end_date = start_date + timedelta(hours=1)
+                    else:
+                        # Default to 1 hour if missing
+                        from datetime import timedelta
+                        end_date = start_date + timedelta(hours=1)
+
                     event = CalendarEvent(
                         title=event_data["title"],
-                        start_date=datetime.fromisoformat(event_data["start_date"]),
-                        end_date=datetime.fromisoformat(event_data["end_date"]),
+                        start_date=start_date,
+                        end_date=end_date,
                         location=event_data.get("location"),
                         notes=event_data.get("notes"),
                         all_day=event_data.get("all_day", False),
@@ -183,12 +326,18 @@ Return JSON only."""
             reminders = []
             for reminder_data in data.get("reminders", []):
                 try:
+                    due_date_str = reminder_data.get("due_date")
+                    due_date = None
+                    if isinstance(due_date_str, str):
+                         try:
+                             due_date = datetime.fromisoformat(due_date_str)
+                         except ValueError:
+                             logger.warning(f"Invalid reminder due date: {due_date_str}")
+                    
                     reminder = Reminder(
                         title=reminder_data["title"],
                         notes=reminder_data.get("notes"),
-                        due_date=datetime.fromisoformat(reminder_data["due_date"])
-                        if reminder_data.get("due_date")
-                        else None,
+                        due_date=due_date,
                         priority=reminder_data.get("priority", 0),
                     )
                     if reminder.validate():
@@ -213,9 +362,10 @@ Return JSON only."""
             return result
 
         except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse AI response as JSON: {e}")
+            snippet = content[:100] if content else "Empty response"
+            logger.error(f"Failed to parse AI response as JSON: {e}. Content snippet: {snippet}")
             return ParseResult.error(
-                "AI returned invalid format. Please try again.", original_text
+                f"AI returned invalid format: {snippet}...", original_text
             )
         except Exception as e:
             logger.error(f"Error parsing AI response: {e}")

@@ -51,17 +51,24 @@ def handle_parse_command(parsed_input: ParsedInput, feedback: FeedbackBuilder) -
         parse_result = parse_service.parse_input(text)
 
         if parse_result.errors:
+            error_msg = "\n".join(parse_result.errors)
+            from ...utils.notifier import send_notification
+            send_notification("Reminder-Alf Parse Failed", error_msg)
+            
             return feedback.clear().add_error(
                 "Parse Failed",
-                "\n".join(parse_result.errors),
+                error_msg,
                 "Try rephrasing your input"
             )
 
         if parse_result.is_empty():
+            msg = "Could not identify calendar events or reminders."
+            from ...utils.notifier import send_notification
+            send_notification("Reminder-Alf", msg)
+            
             return feedback.clear().add_warning(
                 "No Items Found",
-                "Could not identify calendar events or reminders. "
-                "Try being more specific (e.g., include dates/times)"
+                msg + " Try being more specific (e.g., include dates/times)"
             )
 
         # Create items in system
@@ -98,18 +105,29 @@ def handle_parse_command(parsed_input: ParsedInput, feedback: FeedbackBuilder) -
             summary += f"\n⚠️ Ambiguities: {', '.join(parse_result.ambiguities[:2])}"
 
         feedback.add_info("Summary", summary)
+        
+        # Send notification
+        from ...utils.notifier import send_notification
+        send_notification("Reminder-Alf", summary)
 
         # Show errors if any
         if errors:
+            error_msg = "\n".join(errors[:3])
             feedback.add_warning(
                 "Some Items Failed",
-                "\n".join(errors[:3])
+                error_msg
             )
+            # Notify about errors 
+            send_notification("Reminder-Alf Warning", f"Some items failed: {error_msg}")
 
         return feedback
 
     except Exception as e:
         logger.error(f"Parse handler error: {e}", exc_info=True)
+        # Notify about exception
+        from ...utils.notifier import send_notification
+        send_notification("Reminder-Alf Error", str(e))
+        
         return feedback.clear().add_error(
             "Error",
             str(e),
