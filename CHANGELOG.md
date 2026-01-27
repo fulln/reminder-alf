@@ -3,6 +3,26 @@
 All notable changes to Reminder-Alf will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+
+## [Unreleased]
+
+## [1.1.0] - 2026-01-27
+
+### Added
+- add automated release workflow via GitHub Actions
+- add Python package distribution to releases
+- initial release with AI-powered calendar and reminder management (#1)
+
+### Changed
+- consolidate version to pyproject.toml only
+- reorganize project structure and add badges
+- Initial commit from Specify template
+
+### Fixed
+- resolve GitHub Actions CI build failures
+- correct pyproject.toml structure
+- update pyproject.toml with correct metadata
+- standardize on main as primary branch
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.0.0] - 2026-01-26
