@@ -17,14 +17,6 @@ classifiers = [
     "Topic :: Office/Business :: Scheduling",
     "Topic :: Utilities",
 ]
-
-[project.urls]
-Homepage = "https://github.com/fulln/reminder-alf"
-Repository = "https://github.com/fulln/reminder-alf"
-Documentation = "https://github.com/fulln/reminder-alf/blob/main/README.md"
-Issues = "https://github.com/fulln/reminder-alf/issues"
-Changelog = "https://github.com/fulln/reminder-alf/blob/main/CHANGELOG.md"
-
 dependencies = [
     "pyobjc-framework-EventKit>=10.0",
     "alfred-workflow>=1.39.0",
@@ -33,6 +25,13 @@ dependencies = [
     "httpx>=0.25.0",
     "python-dateutil>=2.8.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/fulln/reminder-alf"
+Repository = "https://github.com/fulln/reminder-alf"
+Documentation = "https://github.com/fulln/reminder-alf/blob/main/README.md"
+Issues = "https://github.com/fulln/reminder-alf/issues"
+Changelog = "https://github.com/fulln/reminder-alf/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = [
