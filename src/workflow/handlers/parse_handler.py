@@ -1,6 +1,7 @@
 """
 Parse command handler for Alfred.
 """
+from datetime import datetime
 from ..input_handler import ParsedInput
 from ..feedback_builder import FeedbackBuilder
 from ...services.parse_service import ParseService
@@ -103,6 +104,55 @@ def handle_parse_command(parsed_input: ParsedInput, feedback: FeedbackBuilder) -
         summary = f"✅ Created {events_created} events, {reminders_created} reminders"
         if parse_result.ambiguities:
             summary += f"\n⚠️ Ambiguities: {', '.join(parse_result.ambiguities[:2])}"
+
+        # Generate shareable text summary
+        share_lines = ["📅 Reminder-Alf 识别结果:"]
+        if parse_result.calendar_events:
+            share_lines.append("\n【日历行程】")
+            for e in sorted(parse_result.calendar_events, key=lambda x: x.start_date):
+                time_str = e.start_date.strftime("%m/%d %H:%M")
+                share_lines.append(f"• {time_str} {e.title}")
+        
+        if parse_result.reminders:
+            share_lines.append("\n【提醒事项】")
+            for r in parse_result.reminders:
+                due_str = f"({r.due_date.strftime('%m/%d %H:%M')})" if r.due_date else ""
+                share_lines.append(f"• {r.title} {due_str}")
+
+        share_text = "\n".join(share_lines)
+        
+        # Generate encoded import block for Shortcuts (Ultra Compressed)
+        try:
+            import base64
+            import json
+            import zlib
+
+            # Use extremely short keys for compression
+            import_data = {
+                "v": 2, # Version indicator for compressed format
+                "e": [{"t": ev.title, "s": ev.start_date.isoformat(), "e": ev.end_date.isoformat(), 
+                       "l": ev.location, "n": ev.notes} for ev in parse_result.calendar_events],
+                "r": [{"t": rm.title, "d": rm.due_date.isoformat() if rm.due_date else None, 
+                       "p": rm.priority} for rm in parse_result.reminders]
+            }
+            json_str = json.dumps(import_data)
+            # Compress with zlib
+            compressed = zlib.compress(json_str.encode('utf-8'), level=9)
+            encoded_data = base64.b64encode(compressed).decode()
+            
+            share_text += f"\n\n【快捷指令一键导入口令】\n--- REMINDER-ALF START ---\n{encoded_data}\n--- REMINDER-ALF END ---"
+            share_text += "\n\n(复制消息并在手机浏览器打开 https://reminders.work 即可一键导入)"
+        except Exception as e:
+            logger.error(f"Failed to generate import block: {e}")
+        
+        # Copy to clipboard
+        try:
+            import subprocess
+            process = subprocess.Popen(['pbcopy'], stdin=subprocess.PIPE, text=True)
+            process.communicate(input=share_text)
+            summary += "\n📋 Summary & Import Block copied"
+        except Exception as e:
+            logger.error(f"Failed to copy to clipboard: {e}")
 
         feedback.add_info("Summary", summary)
         

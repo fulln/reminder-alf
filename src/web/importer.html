@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reminder-Alf 导入助手</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent-primary: #8b5cf6;
+            --accent-secondary: #ec4899;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.15) 0, transparent 50%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 0.75rem;
+            color: var(--text-primary);
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            resize: none;
+            margin-bottom: 1.5rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-primary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+            margin-top: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Premium Apple-style Button */
+        .apple-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .apple-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .apple-button svg {
+            color: var(--accent-primary);
+        }
+
+        .results {
+            margin-top: 2rem;
+            display: none;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .item-list {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .item-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        .item-info h3 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .item-info p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .badge-reminder {
+            border-left-color: var(--accent-secondary);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .footer {
+            margin-top: auto;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            opacity: 0.6;
+            padding-top: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>reminders.work</h1>
+            <p class="subtitle">AI 灵动日程：跨设备一键导入助手</p>
+        </header>
+
+        <!-- Shortcut Install Card -->
+        <div class="card" style="margin-bottom: 2.5rem; border-color: rgba(139, 92, 246, 0.3);">
+            <div class="title-with-icon"
+                style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.8rem; font-weight: 600;">
+                <span>📲 iOS 快捷指令助手</span>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.2rem;">
+                在手机上安装配套快捷指令，即可直接通过系统分享菜单解析任何文本。
+            </p>
+            <a href="https://www.icloud.com/shortcuts/4fd8fa120acb4b3eba667aae287d28aa" class="apple-button"
+                id="installShortcutLink">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                </svg>
+                <span>添加到快捷指令 (iOS)</span>
+            </a>
+            <p style="text-align: center; color: var(--text-secondary); font-size: 0.75rem; margin-top: 0.8rem;">
+                (安装后复制 Mac 上的口令即可实现秒级同步)
+            </p>
+        </div>
+
+        <div class="card">
+            <textarea id="importInput" placeholder="在此粘贴导入口令..."></textarea>
+            <button class="btn btn-primary" id="decodeBtn">
+                <span>🚀 解析并准备导入</span>
+            </button>
+            <button class="btn btn-secondary hidden" id="pasteBtn">
+                <span>📋 从剪贴板粘贴</span>
+            </button>
+        </div>
+
+        <div id="results" class="results">
+            <div id="eventSection" class="hidden">
+                <div class="section-title">📅 发现行程日程</div>
+                <div id="eventList" class="item-list"></div>
+                <button class="btn btn-primary" style="background: var(--success);" id="downloadIcsBtn">
+                    <span>✨ 一键导入系统日历与提醒</span>
+                </button>
+                <p style="text-align: center; color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.5rem;">
+                    (支持 iOS 与 Android 系统)
+                </p>
+            </div>
+
+            <div id="reminderSection" class="hidden" style="margin-top: 2rem;">
+                <div class="section-title">🔔 发现提醒事项</div>
+                <div id="reminderList" class="item-list"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 reminders.work | Powered by Reminder-Alf AI
+        </div>
+    </div>
+
+    <script>
+        const input = document.getElementById('importInput');
+        const decodeBtn = document.getElementById('decodeBtn');
+        const results = document.getElementById('results');
+        const eventSection = document.getElementById('eventSection');
+        const reminderSection = document.getElementById('reminderSection');
+        const eventList = document.getElementById('eventList');
+        const reminderList = document.getElementById('reminderList');
+        const downloadIcsBtn = document.getElementById('downloadIcsBtn');
+        const pasteBtn = document.getElementById('pasteBtn');
+
+        let currentData = null;
+
+        // Clipboard Support Detection
+        if (navigator.clipboard && navigator.clipboard.readText) {
+            pasteBtn.classList.remove('hidden');
+        }
+
+        pasteBtn.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                input.value = text;
+                autoDetect(text);
+            } catch (err) {
+                console.error('Failed to read clipboard: ', err);
+                alert('无法读取剪贴板，请手动粘贴。某些浏览器需在设置中开启权限。');
+            }
+        });
+
+        // Auto-detect on page focus
+        window.addEventListener('focus', async () => {
+            if (navigator.clipboard && navigator.clipboard.readText) {
+                try {
+                    // Check if permission is already granted (optional, let readText trigger prompt if not)
+                    const text = await navigator.clipboard.readText();
+                    if (isReminderAlfBlock(text) && input.value !== text) {
+                        input.value = text;
+                        autoDetect(text);
+                    }
+                } catch (e) {
+                    // Ignore focus errors (usually permission or user hasn't interacted yet)
+                }
+            }
+        });
+
+        function isReminderAlfBlock(text) {
+            return text.includes('--- REMINDER-ALF START ---');
+        }
+
+        async function autoDetect(text) {
+            if (isReminderAlfBlock(text)) {
+                decodeBtn.click();
+            }
+        }
+
+        decodeBtn.addEventListener('click', async () => {
+            const raw = input.value;
+            const match = raw.match(/--- REMINDER-ALF START ---\n?([\s\S]*?)\n?--- REMINDER-ALF END ---/);
+
+            const b64 = (match ? match[1].trim() : raw.trim()).replace(/\s/g, '');
+
+            try {
+                const data = await decompressData(b64);
+                currentData = data;
+                renderResults(data);
+            } catch (e) {
+                console.error('Extraction failed:', e);
+                // Last ditch effort: if it doesn't look like a zlib block, try plain JSON
+                try {
+                    const json = atob(b64);
+                    if (json.trim().startsWith('{') || json.trim().startsWith('[')) {
+                        const data = JSON.parse(json);
+                        currentData = data;
+                        renderResults(data);
+                        return;
+                    }
+                } catch (jsonErr) {
+                    // fall through to main alert
+                }
+                alert('解析失败：口令内容损坏或格式不正确。\n\n提示: 请确保复制了完整的口令区块。');
+            }
+        });
+
+        async function decompressData(b64) {
+            const binString = atob(b64);
+            const bytes = new Uint8Array(binString.length);
+            for (let i = 0; i < binString.length; i++) {
+                bytes[i] = binString.charCodeAt(i);
+            }
+
+            // check for zlib header 0x78
+            if (bytes[0] !== 0x78) {
+                throw new Error('Not a compressed block');
+            }
+
+            const ds = new DecompressionStream('deflate');
+            const writer = ds.writable.getWriter();
+            await writer.write(bytes);
+            await writer.close();
+
+            const response = new Response(ds.readable);
+            const jsonStr = await response.text();
+            const rawData = JSON.parse(jsonStr);
+
+            // Map short keys back if it's v2
+            if (rawData.v === 2) {
+                return {
+                    events: (rawData.e || []).map(ev => ({
+                        title: ev.t,
+                        start_date: ev.s,
+                        end_date: ev.e,
+                        location: ev.l,
+                        notes: ev.n
+                    })),
+                    reminders: (rawData.r || []).map(rm => ({
+                        title: rm.t,
+                        due_date: rm.d,
+                        priority: rm.p
+                    }))
+                };
+            }
+            return rawData;
+        }
+
+        function renderResults(data) {
+            results.style.display = 'block';
+            eventList.innerHTML = '';
+            reminderList.innerHTML = '';
+
+            if (data.events && data.events.length > 0) {
+                eventSection.classList.remove('hidden');
+                data.events.forEach(ev => {
+                    const card = document.createElement('div');
+                    card.className = 'item-card';
+                    card.innerHTML = `
+                        <div class="item-info">
+                            <h3>${ev.title}</h3>
+                            <p>${new Date(ev.start_date).toLocaleString()} @ ${ev.location || '未知位置'}</p>
+                        </div>
+                    `;
+                    eventList.appendChild(card);
+                });
+            } else {
+                eventSection.classList.add('hidden');
+            }
+
+            if (data.reminders && data.reminders.length > 0) {
+                reminderSection.classList.remove('hidden');
+                data.reminders.forEach(rm => {
+                    const card = document.createElement('div');
+                    card.className = 'item-card badge-reminder';
+                    card.innerHTML = `
+                        <div class="item-info">
+                            <h3>${rm.title}</h3>
+                            <p>${rm.due_date ? new Date(rm.due_date).toLocaleString() : '无截止时间'}</p>
+                        </div>
+                        <button onclick="copyText('${rm.title}')" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">📋</button>
+                    `;
+                    reminderList.appendChild(card);
+                });
+            } else {
+                reminderSection.classList.add('hidden');
+            }
+        }
+
+        window.copyText = (text) => {
+            navigator.clipboard.writeText(text).then(() => alert('已拷贝标题: ' + text));
+        };
+
+        downloadIcsBtn.addEventListener('click', () => {
+            if (!currentData) return;
+
+            let ics = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//Reminder-Alf//Importer//CN',
+                'CALSCALE:GREGORIAN',
+                'METHOD:PUBLISH'
+            ];
+
+            const formatDate = (iso) => {
+                const d = new Date(iso);
+                const pad = (n) => n.toString().padStart(2, '0');
+                return d.getUTCFullYear() +
+                    pad(d.getUTCMonth() + 1) +
+                    pad(d.getUTCDate()) + 'T' +
+                    pad(d.getUTCHours()) +
+                    pad(d.getUTCMinutes()) +
+                    pad(d.getUTCSeconds()) + 'Z';
+            };
+
+            // Add Events (VEVENT)
+            if (currentData.events) {
+                currentData.events.forEach(ev => {
+                    ics.push('BEGIN:VEVENT');
+                    ics.push(`SUMMARY:${ev.title}`);
+                    ics.push(`DTSTART:${formatDate(ev.start_date)}`);
+                    ics.push(`DTEND:${formatDate(ev.end_date)}`);
+                    ics.push('CATEGORIES:Reminder-Alf');
+                    if (ev.location) ics.push(`LOCATION:${ev.location}`);
+                    if (ev.notes) ics.push(`DESCRIPTION:${ev.notes.replace(/\n/g, '\\n')}`);
+                    ics.push('END:VEVENT');
+                });
+            }
+
+            // Add Reminders (VTODO)
+            if (currentData.reminders) {
+                currentData.reminders.forEach(rm => {
+                    ics.push('BEGIN:VTODO');
+                    ics.push(`SUMMARY:${rm.title}`);
+                    ics.push('CATEGORIES:Reminder-Alf');
+                    if (rm.due_date) {
+                        ics.push(`DUE:${formatDate(rm.due_date)}`);
+                    }
+                    ics.push('STATUS:NEEDS-ACTION');
+                    ics.push('END:VTODO');
+                });
+            }
+
+            ics.push('END:VCALENDAR');
+
+            const blob = new Blob([ics.join('\n')], { type: 'text/calendar;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'trip_events.ics';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    </script>
+</body>
+
+</html>

@@ -25,6 +25,7 @@ try:
         handle_delete_command,
         handle_list_command,
         handle_help_command,
+        handle_clean_command,
     )
     from src.utils.logger import get_logger
 
@@ -46,6 +47,7 @@ try:
             command_router.register("config", handle_config_command)
             command_router.register("delete", handle_delete_command)
             command_router.register("list", handle_list_command)
+            command_router.register("clean", handle_clean_command)
             command_router.register("help", handle_help_command)
             command_router.register_default(handle_help_command)
 

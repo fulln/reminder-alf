@@ -49,6 +49,7 @@ class InputHandler:
             "config": "Manage AI configuration",
             "delete": "Delete tracked items",
             "list": "List tracked items",
+            "clean": "Cleanup unexecuted tagged items",
             "help": "Show help",
         }
 

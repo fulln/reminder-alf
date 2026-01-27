@@ -124,6 +124,13 @@ class EventKitBridge:
             if event.notes:
                 ek_event.setNotes_(event.notes)
 
+            # Add tag for easy filtering/deletion
+            try:
+                # categories expect an array of strings
+                ek_event.addCategory_("Reminder-Alf")
+            except Exception:
+                pass
+
             ek_event.setAllDay_(event.all_day)
 
             if event.url:
@@ -205,6 +212,12 @@ class EventKitBridge:
                     reminder.due_date,
                 )
                 ek_reminder.setDueDateComponents_(components)
+
+            # Add tag for easy filtering/deletion
+            try:
+                ek_reminder.addCategory_("Reminder-Alf")
+            except Exception:
+                pass
 
             # Set priority (0-3 maps to EKReminderPriority)
             ek_reminder.setPriority_(reminder.priority)
@@ -322,3 +335,80 @@ class EventKitBridge:
             if reminder_list.title() == name:
                 return reminder_list
         return None
+
+    def cleanup_tagged_items(self, dry_run: bool = False) -> Tuple[int, int, List[str]]:
+        """
+        Cleanup "unexecuted" items tagged with 'Reminder-Alf'.
+        
+        Args:
+            dry_run: If True, only count items without deleting.
+            
+        Returns:
+            (deleted_events_count, deleted_reminders_count, item_titles)
+        """
+        deleted_events = 0
+        deleted_reminders = 0
+        titles = []
+        now = datetime.now()
+
+        # 1. Cleanup Future Events
+        if self.request_calendar_access():
+            # Search from now to 1 year in the future
+            from Foundation import NSDate
+            start_date = NSDate.date()
+            end_date = NSDate.dateWithTimeIntervalSinceNow_(365 * 24 * 60 * 60)
+            
+            predicate = self.event_store.predicateForEventsWithStartDate_endDate_calendars_(
+                start_date, end_date, None
+            )
+            events = self.event_store.eventsMatchingPredicate_(predicate)
+            
+            for event in events:
+                # Check categories
+                cats = event.categories()
+                if cats and "Reminder-Alf" in cats:
+                    titles.append(f"[Event] {event.title()}")
+                    if not dry_run:
+                        error = None
+                        self.event_store.removeEvent_span_error_(
+                            event, EventKit.EKSpanThisEvent, error
+                        )
+                    deleted_events += 1
+
+        # 2. Cleanup Incomplete Reminders
+        if self.request_reminder_access():
+            import threading
+            reminders_done = threading.Event()
+            found_reminders = []
+
+            def reminders_completion(reminders):
+                if reminders:
+                    for r in reminders:
+                        # Check categories and incomplete status
+                        # Note: EKReminder.isCompleted() or completed()
+                        if not r.isCompleted():
+                            cats = r.categories()
+                            if cats and "Reminder-Alf" in cats:
+                                found_reminders.append(r)
+                reminders_done.set()
+
+            calendars = self.event_store.calendarsForEntityType_(EventKit.EKEntityTypeReminder)
+            reminders_predicate = self.event_store.predicateForRemindersInCalendars_(calendars)
+            
+            # This call is async
+            self.event_store.fetchRemindersMatchingPredicate_completion_(
+                reminders_predicate, reminders_completion
+            )
+            
+            # Wait for completion (max 10s)
+            reminders_done.wait(timeout=10)
+            
+            for reminder in found_reminders:
+                titles.append(f"[Reminder] {reminder.title()}")
+                if not dry_run:
+                    error = None
+                    # REMEMBER: saveReminder_commit_error_ or removeReminder_commit_error_
+                    self.event_store.removeReminder_commit_error_(reminder, True, error)
+                deleted_reminders += 1
+            
+        return deleted_events, deleted_reminders, titles
