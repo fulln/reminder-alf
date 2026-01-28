@@ -1,6 +1,6 @@
 [project]
 name = "reminder-alf"
-version = "1.3.0"
+version = "1.4.0"
 description = "AI-powered calendar and reminder management for Alfred on macOS"
 authors = [{name = "Reminder-Alf Contributors"}]
 readme = "README.md"
