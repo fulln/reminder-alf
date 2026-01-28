@@ -17,6 +17,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Changed
 - Minor updates and improvements
 
+## [1.4.1] - 2026-01-28
+
+### Changed
+- Minor updates and improvements
+
 ## [Unreleased]
 
 ## [1.1.0] - 2026-01-27
