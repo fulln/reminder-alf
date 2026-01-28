@@ -107,16 +107,38 @@ def handle_parse_command(parsed_input: ParsedInput, feedback: FeedbackBuilder) -
         if parse_result.ambiguities:
             summary += f"\n⚠️ Ambiguities: {', '.join(parse_result.ambiguities[:2])}"
 
+        # Language detection for shareable summary
+        def is_chinese(t: str) -> bool:
+            return any('\u4e00' <= char <= '\u9fff' for char in t)
+        
+        lang = "zh" if is_chinese(text) else "en"
+        labels = {
+            "zh": {
+                "title": "📅 Reminder-Alf 识别结果:",
+                "events_header": "\n【日历行程】",
+                "reminders_header": "\n【提醒事项】",
+                "import_block_header": "【快捷指令一键导入口令】",
+                "import_instructions": "(复制消息并在手机浏览器打开 https://reminders.work 即可一键导入)"
+            },
+            "en": {
+                "title": "📅 Reminder-Alf Results:",
+                "events_header": "\n[Calendar Events]",
+                "reminders_header": "\n[Reminders]",
+                "import_block_header": "[One-click Import Code]",
+                "import_instructions": "(Copy this message and open https://reminders.work in a mobile browser to import)"
+            }
+        }[lang]
+
         # Generate shareable text summary
-        share_lines = ["📅 Reminder-Alf 识别结果:"]
+        share_lines = [labels["title"]]
         if parse_result.calendar_events:
-            share_lines.append("\n【日历行程】")
+            share_lines.append(labels["events_header"])
             for e in sorted(parse_result.calendar_events, key=lambda x: x.start_date):
                 time_str = e.start_date.strftime("%m/%d %H:%M")
                 share_lines.append(f"• {time_str} {e.title}")
         
         if parse_result.reminders:
-            share_lines.append("\n【提醒事项】")
+            share_lines.append(labels["reminders_header"])
             for r in parse_result.reminders:
                 due_str = f"({r.due_date.strftime('%m/%d %H:%M')})" if r.due_date else ""
                 share_lines.append(f"• {r.title} {due_str}")
@@ -142,8 +164,8 @@ def handle_parse_command(parsed_input: ParsedInput, feedback: FeedbackBuilder) -
             compressed = zlib.compress(json_str.encode('utf-8'), level=9)
             encoded_data = base64.b64encode(compressed).decode()
             
-            share_text += f"\n\n【快捷指令一键导入口令】\n--- REMINDER-ALF START ---\n{encoded_data}\n--- REMINDER-ALF END ---"
-            share_text += "\n\n(复制消息并在手机浏览器打开 https://reminders.work 即可一键导入)"
+            share_text += f"\n\n{labels['import_block_header']}\n--- REMINDER-ALF START ---\n{encoded_data}\n--- REMINDER-ALF END ---"
+            share_text += f"\n\n{labels['import_instructions']}"
         except Exception as e:
             logger.error(f"Failed to generate import block: {e}")
         
