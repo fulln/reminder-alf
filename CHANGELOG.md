@@ -4,6 +4,14 @@ All notable changes to Reminder-Alf will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
+## [1.3.0] - 2026-01-28
+
+### Added
+- implement adaptive language for shareable summary
+- optimize AI parsing for long itineraries and add i18n support to importer
+
+### Changed
+- fix(release): correct test path in release script
 ## [Unreleased]
 
 ## [1.1.0] - 2026-01-27
