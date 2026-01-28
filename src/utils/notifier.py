@@ -8,16 +8,12 @@ from shlex import quote
 
 def send_notification(title: str, message: str, sound: bool = True) -> None:
     """
-    Send a macOS system notification.
+    Send a macOS system notification using osascript.
     
     Args:
         title: Notification title
         message: Notification message body
         sound: Whether to play default sound
-    """
-def send_notification(title: str, message: str, sound: bool = True) -> None:
-    """
-    Send a macOS system notification.
     """
     # Escape quotes and backslashes for AppleScript string literals
     safe_title = title.replace('\\', '\\\\').replace('"', '\\"')

@@ -43,6 +43,23 @@
             z-index: 1;
         }
 
+        .lang-switcher {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+        }
+
+        .lang-select {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid var(--glass-border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            outline: none;
+            cursor: pointer;
+        }
+
         header {
             text-align: center;
             margin-bottom: 2.5rem;
@@ -250,37 +267,48 @@
 
 <body>
     <div class="container">
+        <div class="lang-switcher">
+            <select id="langSelect" class="lang-select">
+                <option value="en">English</option>
+                <option value="zh">中文</option>
+            </select>
+        </div>
         <header>
             <h1>reminders.work</h1>
-            <p class="subtitle">AI 灵动日程：跨设备一键导入助手</p>
+            <p class="subtitle" data-i18n="subtitle">AI Smart Agenda: Cross-device One-click Import Assistant</p>
         </header>
 
-
         <div class="card">
-            <textarea id="importInput" placeholder="在此粘贴导入口令..."></textarea>
+            <textarea id="importInput" data-i18n-placeholder="placeholder"
+                placeholder="Paste import code here..."></textarea>
             <button class="btn btn-primary" id="decodeBtn">
-                <span>🚀 解析并准备导入</span>
+                <span data-i18n="decodeBtn">🚀 Parse and Prepare</span>
             </button>
             <button class="btn btn-secondary hidden" id="pasteBtn">
-                <span>📋 从剪贴板粘贴</span>
+                <span data-i18n="pasteBtn">📋 Paste from Clipboard</span>
             </button>
         </div>
 
         <div id="results" class="results">
             <div id="eventSection" class="hidden">
-                <div class="section-title">📅 发现行程日程</div>
+                <div class="section-title">📅 <span data-i18n="eventsFound">Events Found</span></div>
                 <div id="eventList" class="item-list"></div>
-                <button class="btn btn-primary" style="background: var(--success);" id="downloadIcsBtn">
-                    <span>✨ 一键导入系统日历与提醒</span>
-                </button>
-                <p style="text-align: center; color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.5rem;">
-                    (支持 iOS 与 Android 系统)
-                </p>
             </div>
 
             <div id="reminderSection" class="hidden" style="margin-top: 2rem;">
-                <div class="section-title">🔔 发现提醒事项</div>
+                <div class="section-title">🔔 <span data-i18n="remindersFound">Reminders Found</span></div>
                 <div id="reminderList" class="item-list"></div>
+            </div>
+
+            <div id="importActions" class="hidden"
+                style="margin-top: 2rem; border-top: 1px solid var(--glass-border); padding-top: 1.5rem;">
+                <button class="btn btn-primary" style="background: var(--success);" id="downloadIcsBtn">
+                    <span data-i18n="importBtn">✨ Import to Calendar & Reminders</span>
+                </button>
+                <p style="text-align: center; color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.5rem;"
+                    data-i18n="supportPlatforms">
+                    (Supports iOS & Android)
+                </p>
             </div>
         </div>
 
@@ -290,17 +318,86 @@
     </div>
 
     <script>
+        const translations = {
+            en: {
+                subtitle: "AI Smart Agenda: Cross-device One-click Import Assistant",
+                placeholder: "Paste import code here...",
+                decodeBtn: "🚀 Parse and Prepare",
+                pasteBtn: "📋 Paste from Clipboard",
+                eventsFound: "Events Found",
+                remindersFound: "Reminders Found",
+                importBtn: "✨ Import to Calendar & Reminders",
+                supportPlatforms: "(Supports iOS & Android)",
+                unknownLocation: "Unknown Location",
+                noDueDate: "No Due Date",
+                copied: "Copied: ",
+                browserLegacy: "Sorry, your browser is too old to support the decompression required for import.\nPlease try updating or using Safari/Chrome.",
+                parseFailed: "Parsing failed: Invalid or damaged code.\n\nDetail: ",
+                parseFailedTip: "\n\nTip: Ensure you copied the entire block.",
+                clipboardFailed: "Failed to read clipboard. Please paste manually.",
+                importSuccess: "✨ Exported!",
+                importSuccessTip: "Calendar and reminders have been exported as an .ics file.\n\nPlease open the downloaded file ('trip_events.ics') to complete the import into your system."
+            },
+            zh: {
+                subtitle: "AI 灵动日程：跨设备一键导入助手",
+                placeholder: "在此粘贴导入口令...",
+                decodeBtn: "🚀 解析并准备导入",
+                pasteBtn: "📋 从剪贴板粘贴",
+                eventsFound: "发现行程日程",
+                remindersFound: "发现提醒事项",
+                importBtn: "✨ 一键导入系统日历与提醒",
+                supportPlatforms: "(支持 iOS 与 Android 系统)",
+                unknownLocation: "未知位置",
+                noDueDate: "无截止时间",
+                copied: "已拷贝标题: ",
+                browserLegacy: "抱歉，您的浏览器太旧，不支持一键导入所需的解压功能。\n请尝试更新浏览器或使用最新版的 Safari/Chrome。",
+                parseFailed: "解析失败：口令内容损坏或格式不正确。\n\n详情: ",
+                parseFailedTip: "\n\n提示: 请确保复制了完整的口令区块。",
+                clipboardFailed: "无法读取剪贴板，请手动粘贴。某些浏览器需在设置中开启权限。",
+                importSuccess: "✨ 导出成功！",
+                importSuccessTip: "日程和提醒事项已导出为 .ics 文件。\n\n请打开下载的文件 ('trip_events.ics') 即可完成导入系统日历/提醒事项。"
+            }
+        };
+
+        let currentLang = localStorage.getItem('lang') || (navigator.language.startsWith('zh') ? 'zh' : 'en');
+        const langSelect = document.getElementById('langSelect');
+
+        function updateUI() {
+            const t = translations[currentLang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) el.textContent = t[key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (t[key]) el.placeholder = t[key];
+            });
+            langSelect.value = currentLang;
+            document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+            if (currentData) renderResults(currentData);
+        }
+
+        langSelect.addEventListener('change', (e) => {
+            currentLang = e.target.value;
+            localStorage.setItem('lang', currentLang);
+            updateUI();
+        });
+
         const input = document.getElementById('importInput');
         const decodeBtn = document.getElementById('decodeBtn');
         const results = document.getElementById('results');
         const eventSection = document.getElementById('eventSection');
         const reminderSection = document.getElementById('reminderSection');
+        const importActions = document.getElementById('importActions');
         const eventList = document.getElementById('eventList');
         const reminderList = document.getElementById('reminderList');
         const downloadIcsBtn = document.getElementById('downloadIcsBtn');
         const pasteBtn = document.getElementById('pasteBtn');
 
         let currentData = null;
+
+        // Initial setup
+        updateUI();
 
         // Clipboard Support Detection
         if (navigator.clipboard && navigator.clipboard.readText) {
@@ -314,7 +411,7 @@
                 autoDetect(text);
             } catch (err) {
                 console.error('Failed to read clipboard: ', err);
-                alert('无法读取剪贴板，请手动粘贴。某些浏览器需在设置中开启权限。');
+                alert(translations[currentLang].clipboardFailed);
             }
         });
 
@@ -322,20 +419,22 @@
         window.addEventListener('focus', async () => {
             if (navigator.clipboard && navigator.clipboard.readText) {
                 try {
-                    // Check if permission is already granted (optional, let readText trigger prompt if not)
                     const text = await navigator.clipboard.readText();
                     if (isReminderAlfBlock(text) && input.value !== text) {
                         input.value = text;
                         autoDetect(text);
                     }
-                } catch (e) {
-                    // Ignore focus errors (usually permission or user hasn't interacted yet)
-                }
+                } catch (e) { }
             }
         });
 
         function isReminderAlfBlock(text) {
             return text.includes('--- REMINDER-ALF START ---');
+        }
+
+        // Browser Compatibility Check
+        if (!window.DecompressionStream) {
+            alert(translations[currentLang].browserLegacy);
         }
 
         async function autoDetect(text) {
@@ -347,7 +446,6 @@
         decodeBtn.addEventListener('click', async () => {
             const raw = input.value;
             const match = raw.match(/--- REMINDER-ALF START ---\n?([\s\S]*?)\n?--- REMINDER-ALF END ---/);
-
             const b64 = (match ? match[1].trim() : raw.trim()).replace(/\s/g, '');
 
             try {
@@ -356,7 +454,6 @@
                 renderResults(data);
             } catch (e) {
                 console.error('Extraction failed:', e);
-                // Last ditch effort: if it doesn't look like a zlib block, try plain JSON
                 try {
                     const json = atob(b64);
                     if (json.trim().startsWith('{') || json.trim().startsWith('[')) {
@@ -365,10 +462,8 @@
                         renderResults(data);
                         return;
                     }
-                } catch (jsonErr) {
-                    // fall through to main alert
-                }
-                alert('解析失败：口令内容损坏或格式不正确。\n\n提示: 请确保复制了完整的口令区块。');
+                } catch (jsonErr) { }
+                alert(translations[currentLang].parseFailed + e.message + translations[currentLang].parseFailedTip);
             }
         });
 
@@ -378,11 +473,7 @@
             for (let i = 0; i < binString.length; i++) {
                 bytes[i] = binString.charCodeAt(i);
             }
-
-            // check for zlib header 0x78
-            if (bytes[0] !== 0x78) {
-                throw new Error('Not a compressed block');
-            }
+            if (bytes[0] !== 0x78) throw new Error('Not a compressed block');
 
             const ds = new DecompressionStream('deflate');
             const writer = ds.writable.getWriter();
@@ -393,20 +484,13 @@
             const jsonStr = await response.text();
             const rawData = JSON.parse(jsonStr);
 
-            // Map short keys back if it's v2
             if (rawData.v === 2) {
                 return {
                     events: (rawData.e || []).map(ev => ({
-                        title: ev.t,
-                        start_date: ev.s,
-                        end_date: ev.e,
-                        location: ev.l,
-                        notes: ev.n
+                        title: ev.t, start_date: ev.s, end_date: ev.e, location: ev.l, notes: ev.n
                     })),
                     reminders: (rawData.r || []).map(rm => ({
-                        title: rm.t,
-                        due_date: rm.d,
-                        priority: rm.p
+                        title: rm.t, due_date: rm.d, priority: rm.p
                     }))
                 };
             }
@@ -417,6 +501,10 @@
             results.style.display = 'block';
             eventList.innerHTML = '';
             reminderList.innerHTML = '';
+            const t = translations[currentLang];
+            const df = new Intl.DateTimeFormat(currentLang === 'zh' ? 'zh-CN' : 'en-US', {
+                month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric'
+            });
 
             if (data.events && data.events.length > 0) {
                 eventSection.classList.remove('hidden');
@@ -426,7 +514,7 @@
                     card.innerHTML = `
                         <div class="item-info">
                             <h3>${ev.title}</h3>
-                            <p>${new Date(ev.start_date).toLocaleString()} @ ${ev.location || '未知位置'}</p>
+                            <p>${df.format(new Date(ev.start_date))} @ ${ev.location || t.unknownLocation}</p>
                         </div>
                     `;
                     eventList.appendChild(card);
@@ -443,7 +531,7 @@
                     card.innerHTML = `
                         <div class="item-info">
                             <h3>${rm.title}</h3>
-                            <p>${rm.due_date ? new Date(rm.due_date).toLocaleString() : '无截止时间'}</p>
+                            <p>${rm.due_date ? df.format(new Date(rm.due_date)) : t.noDueDate}</p>
                         </div>
                         <button onclick="copyText('${rm.title}')" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">📋</button>
                     `;
@@ -452,10 +540,16 @@
             } else {
                 reminderSection.classList.add('hidden');
             }
+
+            if ((data.events && data.events.length > 0) || (data.reminders && data.reminders.length > 0)) {
+                importActions.classList.remove('hidden');
+            } else {
+                importActions.classList.add('hidden');
+            }
         }
 
         window.copyText = (text) => {
-            navigator.clipboard.writeText(text).then(() => alert('已拷贝标题: ' + text));
+            navigator.clipboard.writeText(text).then(() => alert(translations[currentLang].copied + text));
         };
 
         downloadIcsBtn.addEventListener('click', () => {
@@ -518,6 +612,11 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+
+            // Provide feedback
+            setTimeout(() => {
+                alert(translations[currentLang].importSuccess + "\n\n" + translations[currentLang].importSuccessTip);
+            }, 100);
         });
     </script>
 </body>

@@ -43,8 +43,10 @@ def handle_parse_command(parsed_input: ParsedInput, feedback: FeedbackBuilder) -
             "Example: rem 'meeting tomorrow at 2pm'"
         )
 
-    # Show loading indicator
+    # Show loading indicator and notify user immediately
     feedback.add_loading("Parsing with AI...")
+    from ...utils.notifier import send_notification
+    send_notification("Reminder-Alf", "🧠 Thinking... Parsing your request with AI", sound=False)
 
     try:
         # Parse with AI

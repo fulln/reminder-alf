@@ -42,51 +42,54 @@ class AIClient:
     def _build_system_prompt(self) -> str:
         """Build system prompt for AI."""
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        return f"""You are a calendar and reminder parsing assistant. Your task is to extract calendar events and reminders from natural language text in English or Chinese.
+        return f"""You are a calendar and reminder parsing assistant for macOS. Extract events/reminders from text (English/Chinese).
 
-Current date/time: {current_time}
-User timezone: (inferred from system)
+Current time: {current_time}
 
-Output Format: JSON only, no additional text.
+Output: Valid JSON only.
 
 Rules:
-1. Calendar events MUST have explicit time references (e.g., "3pm", "下午3点", "15:00")
-2. Reminders are for action items without specific times (e.g., "remind me to...", "buy milk")
-3. Extract as much detail as possible: title, date, time, location, notes
-4. Use current date/time as reference for relative dates ("tomorrow", "next week", "明天")
-5. If ambiguous, note it in the "ambiguities" field
+1. Calendar events MUST have specific times (e.g. 2pm, 14:00, tomorrow morning).
+2. Reminders are for tasks without specific times or deadlines.
+3. CRITICAL: Titles MUST be short (max 50 chars). 
+4. Move all long descriptions, detailed info, or conversational snippets into the 'notes' field.
+5. For itineraries, extract each stop as a separate calendar_event.
+6. Return ONLY the JSON object. No conversational filler.
 
-Output JSON schema:
+JSON Schema:
 {{
   "calendar_events": [
     {{
-      "title": "string",
-      "start_date": "ISO 8601 datetime",
-      "end_date": "ISO 8601 datetime",
-      "location": "string or null",
-      "notes": "string or null",
-      "all_day": boolean
+      "title": "Short descriptive title (max 50 chars)",
+      "start_date": "ISO8601",
+      "end_date": "ISO8601",
+      "location": "str|null",
+      "notes": "Detailed description/itinerary notes",
+      "all_day": bool
     }}
   ],
   "reminders": [
     {{
-      "title": "string",
-      "due_date": "ISO 8601 datetime or null",
+      "title": "Short task name",
+      "due_date": "ISO8601|null",
       "priority": 0-3,
-      "notes": "string or null"
+      "notes": "str|null"
     }}
   ],
-  "confidence": 0.0-1.0,
-  "ambiguities": ["list of warnings"]
+  "confidence": float,
+  "ambiguities": ["str"]
 }}"""
 
     def _build_user_prompt(self, text: str) -> str:
         """Build user prompt with input text."""
-        return f"""Parse the following text and extract all calendar events and reminders:
+        return f"""Parse this text into Calendar Events and Reminders. 
+Items with specific times -> calendar_events.
+Tasks/Todos -> reminders.
 
-Text: "{text}"
+Text:
+\"\"\"{text}\"\"\"
 
-Return JSON only."""
+Return JSON:"""
 
     def parse_text(self, text: str) -> ParseResult:
         """
@@ -126,10 +129,10 @@ Return JSON only."""
                     {"role": "system", "content": self._build_system_prompt()},
                     {"role": "user", "content": self._build_user_prompt(text)},
                 ],
-                temperature=self.config.temperature,
+                temperature=0.1, # Lower temperature for more consistent JSON
                 max_tokens=self.config.max_tokens,
                 # Pass max_completion_tokens for newer models (o1, etc.) and some providers
-                extra_body={"max_completion_tokens": self.config.max_tokens} if self.config.provider != "openai" else {},
+                extra_body={"max_completion_tokens": 4096} if self.config.provider != "openai" else {}, # Limit completion to reasonable size
                 response_format={"type": "json_object"},
                 stream=True, 
             )
@@ -149,15 +152,6 @@ Return JSON only."""
             
             duration = time.time() - start_time
             logger.info(f"AI request completed in {duration:.2f}s, finish_reason: {finish_reason}, chars: {len(content)}")
-            
-            # Save raw response for debugging
-            try:
-                debug_file = "/tmp/reminder_alf_debug.json"
-                with open(debug_file, "w", encoding="utf-8") as f:
-                    f.write(content)
-                logger.info(f"Raw AI response saved to {debug_file}")
-            except Exception as e:
-                logger.error(f"Failed to save debug file: {e}")
             
             return self._parse_ai_response(content, text)
 
@@ -196,34 +190,32 @@ Return JSON only."""
             try:
                 data = json.loads(content)
             except json.JSONDecodeError:
-                logger.warning("JSON parse failed, attempting to recover valid objects from truncated response")
                 # Recovery strategy: Regex extract complete JSON objects
                 import re
                 
                 data = {
                     "calendar_events": [],
                     "reminders": [],
-                    "ambiguities": []
+                    "ambiguities": ["Recovered from truncated response"]
                 }
                 
-                # 1. Extract calendar_events array content
-                events_match = re.search(r'"calendar_events"\s*:\s*\[(.*?)\]', content, re.DOTALL)
-                if events_match:
-                    events_str = events_match.group(1)
-                else:
-                    # If the array isn't closed, take everything after "calendar_events": [
-                    events_match_start = re.search(r'"calendar_events"\s*:\s*\[', content)
-                    if events_match_start:
-                        events_str = content[events_match_start.end():]
-                        # If reminders start, cut off there
-                        reminders_start = events_str.find('"reminders"')
-                        if reminders_start != -1:
-                            events_str = events_str[:reminders_start]
-                    else:
-                        events_str = ""
+                # Extract sections more robustly
+                def get_section_text(key, text):
+                    match = re.search(f'"{key}"\\s*:\\s*\\[', text)
+                    if not match: return ""
+                    start = match.end()
+                    # Find balanced brackets or end of text
+                    bracket_count = 1
+                    for i in range(start, len(text)):
+                        if text[i] == '[': bracket_count += 1
+                        elif text[i] == ']': bracket_count -= 1
+                        if bracket_count == 0:
+                            return text[start:i]
+                    return text[start:]
 
-                # Extract individual objects { ... }
-                # We count braces to find balanced objects
+                events_str = get_section_text("calendar_events", content)
+                reminders_str = get_section_text("reminders", content)
+
                 def extract_objects(text):
                     objects = []
                     brace_count = 0
@@ -251,34 +243,40 @@ Return JSON only."""
                                 if brace_count == 0 and start_idx != -1:
                                     obj_str = text[start_idx:i+1]
                                     try:
-                                        # Clean newlines in strings again just in case
-                                        obj_str_clean = re.sub(r'(?<=: ")(.*?)(?=")', lambda m: m.group(1).replace('\n', '\\n'), obj_str, flags=re.DOTALL)
-                                        objects.append(json.loads(obj_str_clean))
+                                        obj_str = obj_str.strip()
+                                        obj = json.loads(obj_str)
+                                        # Truncate title if it's too long (legacy or recovery issue)
+                                        if "title" in obj and isinstance(obj["title"], str) and len(obj["title"]) > 100:
+                                            obj["notes"] = (obj.get("notes") or "") + "\n" + obj["title"]
+                                            obj["title"] = obj["title"][:50] + "..."
+                                        objects.append(obj)
                                     except:
-                                        pass # Skip invalid object
+                                        pass
                                     start_idx = -1
+                    
+                    # If we have a trailing unclosed object, try to close it and parse
+                    if brace_count > 0 and start_idx != -1:
+                        try:
+                            candidate = text[start_idx:]
+                            if candidate.count('"') % 2 != 0: candidate += '"'
+                            candidate += '}' * brace_count
+                            obj = json.loads(candidate)
+                            if "title" in obj and isinstance(obj["title"], str) and len(obj["title"]) > 100:
+                                obj["notes"] = (obj.get("notes") or "") + "\n" + obj["title"]
+                                obj["title"] = obj["title"][:50] + "..."
+                            objects.append(obj)
+                        except: pass
+                        
                     return objects
 
                 data["calendar_events"] = extract_objects(events_str)
+                data["reminders"] = extract_objects(reminders_str)
                 
-                # 2. Extract reminders (similar logic)
-                reminders_match = re.search(r'"reminders"\s*:\s*\[(.*?)\]', content, re.DOTALL)
-                if reminders_match:
-                    reminders_str = reminders_match.group(1)
-                    data["reminders"] = extract_objects(reminders_str)
-                else:
-                    # Try open-ended
-                    reminders_match_start = re.search(r'"reminders"\s*:\s*\[', content)
-                    if reminders_match_start:
-                        reminders_str = content[reminders_match_start.end():]
-                        data["reminders"] = extract_objects(reminders_str)
-                
-                # If we recovered nothing, raise error
                 if not data["calendar_events"] and not data["reminders"]:
-                     logger.error(f"Failed to recover any data. Raw: {content}")
+                     logger.error(f"Failed to recover any data. Raw: {content[:100]}...")
                      raise json.JSONDecodeError("Could not recover JSON data", content, 0)
                 
-                logger.info(f"Recovered {len(data['calendar_events'])} events and {len(data['reminders'])} reminders from truncated JSON")
+                logger.info(f"Recovered {len(data['calendar_events'])} events and {len(data['reminders'])} reminders")
             
             if not isinstance(data, dict):
                  raise ValueError(f"Parsed content is not a dictionary. Got: {type(data)}")
