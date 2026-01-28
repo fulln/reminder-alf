@@ -402,7 +402,7 @@ main() {
 
     # 4. 运行测试
     echo -e "${YELLOW}4️⃣  运行测试...${NC}"
-    if python3 -m pytest tests/ -q --tb=short; then
+    if python3 -m pytest src/tests/ -q --tb=short; then
         echo -e "${GREEN}✅ 所有测试通过${NC}"
     else
         echo -e "${RED}❌ 测试失败，请修复后再发布${NC}"
