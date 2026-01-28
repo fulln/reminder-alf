@@ -98,6 +98,5 @@ jobs:
           - [DeepSeek 配置](https://github.com/${{ github.repository }}/blob/main/docs/DEEPSEEK.md)
           - [完整文档](https://github.com/${{ github.repository }}/blob/main/README.md)
         draft: false
-        prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
