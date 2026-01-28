@@ -7,7 +7,7 @@
 **只需 3 个命令：**
 
 ```bash
-cd /Users/fulln/opensource/python/reminder-alf
+cd /path/to/reminder-alf
 
 # 1. 一键安装（包含依赖安装、测试、生成工作流）
 bash quick-install.sh
@@ -28,7 +28,7 @@ ral config set openai sk-YOUR_API_KEY gpt-4
 如果你已经安装过依赖，只想重新生成工作流包：
 
 ```bash
-cd /Users/fulln/opensource/python/reminder-alf
+cd /path/to/reminder-alf
 
 # 生成 .alfredworkflow 文件
 python3.11 build_workflow.py
@@ -50,7 +50,7 @@ open Reminder-Alf.alfredworkflow
 ### 第一步：运行一键安装脚本
 
 ```bash
-cd /Users/fulln/opensource/python/reminder-alf
+cd /path/to/reminder-alf
 bash quick-install.sh
 ```
 
@@ -236,6 +236,9 @@ ral delete old 7
 | `ral <文本>` | 解析并创建 | `ral Meeting at 2pm` |
 | `ral config status` | 查看配置 | - |
 | `ral config set` | 设置配置 | `ral config set openai sk-... gpt-4` |
+| `ral config endpoint` | 设置自定义端点 | `ral config endpoint https://api.deepseek.com` |
+| `ral config timeout` | 设置超时时间 | `ral config timeout 30` |
+| `ral config tokens` | 设置最大 Tokens | `ral config tokens 2000` |
 | `ral list [N]` | 列出最近 N 个项目 | `ral list 20` |
 | `ral delete <id>` | 删除特定项目 | `ral delete event-123` |
 | `ral delete all` | 删除所有 | - |
@@ -268,7 +271,7 @@ bash quick-install.sh
 
 2. 手动测试：
 ```bash
-cd /Users/fulln/opensource/python/reminder-alf
+cd /path/to/reminder-alf
 python3.11 -c "from src.main import main; print('OK')"
 ```
 

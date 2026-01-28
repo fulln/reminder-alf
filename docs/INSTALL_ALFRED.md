@@ -25,7 +25,7 @@ brew install python@3.11
 在项目目录中运行：
 
 ```bash
-cd /Users/fulln/opensource/python/reminder-alf
+cd /path/to/reminder-alf
 
 # 安装依赖
 python3.11 -m pip install -e .
@@ -99,7 +99,7 @@ chmod +x setup.sh
      import os
 
      # 设置项目路径
-     project_path = "/Users/fulln/opensource/python/reminder-alf"
+     project_path = "/path/to/reminder-alf"  # 修改为你的实际项目路径
      sys.path.insert(0, os.path.join(project_path, "src"))
 
      # 导入 Alfred 工作流
@@ -128,7 +128,7 @@ chmod +x setup.sh
 
 ```bash
 # 创建工作流包（在项目目录中）
-cd /Users/fulln/opensource/python/reminder-alf
+cd /path/to/reminder-alf
 # 将 workflow 目录打包
 # (需要手动完成)
 ```
@@ -313,7 +313,7 @@ brew install python@3.11
 **解决方案**：
 ```bash
 # 重新安装依赖
-cd /Users/fulln/opensource/python/reminder-alf
+cd /path/to/reminder-alf
 python3.11 -m pip install -e . --force-reinstall
 ```
 
@@ -357,7 +357,7 @@ ral config set openai sk-YOUR_NEW_KEY gpt-4
 
 2. 手动测试脚本：
    ```bash
-   cd /Users/fulln/opensource/python/reminder-alf
+   cd /path/to/reminder-alf
    python3.11 -c "from src.main import main; print('OK')"
    ```
 
@@ -393,7 +393,7 @@ ral config set openai sk-YOUR_NEW_KEY gpt-4
 如果代码有更新：
 
 ```bash
-cd /Users/fulln/opensource/python/reminder-alf
+cd /path/to/reminder-alf
 
 # 拉取更新
 git pull
@@ -433,7 +433,7 @@ ral config set custom YOUR_API_KEY your-model
 ```python
 #!/usr/bin/env python3.11
 import sys
-sys.path.insert(0, "/Users/fulln/opensource/python/reminder-alf/src")
+sys.path.insert(0, "/path/to/reminder-alf/src")
 
 from services.parse_service import ParseService
 from services.config_manager import ConfigManager
@@ -481,9 +481,9 @@ ral delete old 30
 
 **快速开始：**
 ```bash
-rem Meeting with team tomorrow at 2pm
-rem 明天下午3点开会
-rem Remind me to call John
+ral Meeting with team tomorrow at 2pm
+ral 明天下午3点开会
+ral Remind me to call John
 ```
 
 **需要帮助？**

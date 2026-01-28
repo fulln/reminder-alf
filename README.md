@@ -112,6 +112,21 @@ ral config set <provider> <api-key> [model]
 ral config delete [provider]
 ```
 
+**Set Endpoint:**
+```
+ral config endpoint <url>
+```
+
+**Set Timeout:**
+```
+ral config timeout <seconds>
+```
+
+**Set Max Tokens:**
+```
+ral config tokens <number>
+```
+
 ### Delete Commands
 
 **List Recent Items:**

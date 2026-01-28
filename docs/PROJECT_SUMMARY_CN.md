@@ -38,28 +38,31 @@
 
 ```bash
 # 解析自然语言
-rem Meeting tomorrow at 2pm
-rem 明天下午3点开会
-rem Remind me to buy milk
+ral Meeting tomorrow at 2pm
+ral 明天下午3点开会
+ral Remind me to buy milk
 
 # 配置管理
-rem config status                          # 查看配置状态
-rem config set openai sk-... gpt-4         # 设置 OpenAI
-rem config set anthropic sk-ant-... claude-3-sonnet  # 设置 Claude
-rem config delete                          # 删除配置
+ral config status                          # 查看配置状态
+ral config set openai sk-... gpt-4         # 设置 OpenAI
+ral config set anthropic sk-ant-... claude-3-sonnet  # 设置 Claude
+ral config endpoint <url>                  # 设置自定义端点
+ral config timeout <seconds>               # 设置超时
+ral config tokens <number>                 # 设置最大 token
+ral config delete                          # 删除配置
 
 # 列出项目
-rem list                                   # 列出最近 10 个项目
-rem list 20                                # 列出最近 20 个项目
+ral list                                   # 列出最近 10 个项目
+ral list 20                                # 列出最近 20 个项目
 
 # 删除项目
-rem delete                                 # 显示项目列表供选择
-rem delete <item-id>                       # 删除特定项目
-rem delete all                             # 删除所有项目
-rem delete old 7                           # 删除 7 天前的项目
+ral delete                                 # 显示项目列表供选择
+ral delete <item-id>                       # 删除特定项目
+ral delete all                             # 删除所有项目
+ral delete old 7                           # 删除 7 天前的项目
 
 # 帮助
-rem help                                   # 显示帮助信息
+ral help                                   # 显示帮助信息
 ```
 
 ## 📊 测试覆盖率
@@ -166,47 +169,47 @@ Python 模块:   25 个
 
 ### 创建日历事件
 ```bash
-rem Meeting with John tomorrow at 2pm in Room 305
+ral Meeting with John tomorrow at 2pm in Room 305
 # 创建: 明天下午2点在305室与John开会
 
-rem 下周一上午10点团队站会
+ral 下周一上午10点团队站会
 # 创建: 下周一上午10点的团队站会
 ```
 
 ### 创建提醒事项
 ```bash
-rem Remind me to buy milk
+ral Remind me to buy milk
 # 创建: 买牛奶的提醒
 
-rem 周五下午5点前提交报告
+ral 周五下午5点前提交报告
 # 创建: 周五下午5点的提醒，优先级中等
 ```
 
 ### 配置 AI
 ```bash
 # OpenAI
-rem config set openai sk-YOUR_KEY gpt-4
+ral config set openai sk-YOUR_KEY gpt-4
 
 # Anthropic Claude
-rem config set anthropic sk-ant-YOUR_KEY claude-3-sonnet-20240229
+ral config set anthropic sk-ant-YOUR_KEY claude-3-sonnet-20240229
 
 # 检查状态
-rem config status
+ral config status
 ```
 
 ### 管理项目
 ```bash
 # 列出最近创建的项目
-rem list
+ral list
 
 # 删除特定项目
-rem delete event-123
+ral delete event-123
 
 # 删除所有项目
-rem delete all
+ral delete all
 
 # 删除7天前的项目
-rem delete old 7
+ral delete old 7
 ```
 
 ## 🎓 技术栈

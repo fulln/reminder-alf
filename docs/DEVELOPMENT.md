@@ -54,11 +54,11 @@ Reminder-Alf is a fully functional Alfred workflow that uses AI to parse natural
 - [x] Secure credential storage
 
 ### 📋 Commands
-- [x] `rem <text>` - Parse and create
-- [x] `rem config` - Configuration management
-- [x] `rem list` - View tracked items
-- [x] `rem delete` - Delete items
-- [x] `rem help` - Show help
+- [x] `ral <text>` - Parse and create
+- [x] `ral config` - Configuration management
+- [x] `ral list` - View tracked items
+- [x] `ral delete` - Delete items
+- [x] `ral help` - Show help
 
 ### 🔧 Configuration
 - [x] OpenAI support (GPT-4, GPT-3.5)
