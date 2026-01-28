@@ -12,6 +12,8 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout code
@@ -67,6 +69,7 @@ jobs:
         tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'latest' }}
         name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Latest Pre-release' }}
         prerelease: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        fail_on_unmatched_files: false
         files: |
           Reminder-Alf.alfredworkflow
           dist/*.whl
