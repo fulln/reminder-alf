@@ -14,7 +14,7 @@ class AIConfiguration:
     api_key: str
     api_endpoint: str = "https://api.openai.com/v1"
     temperature: float = 0.7
-    max_tokens: int = 131072
+    max_tokens: int = 4096
     timeout: int = 30
     organization_id: Optional[str] = None  # OpenAI-specific
 
@@ -61,7 +61,7 @@ class AIConfiguration:
             api_key=api_key,
             api_endpoint=endpoint,
             temperature=data.get("temperature", 0.7),
-            max_tokens=data.get("max_tokens", 131072),
+            max_tokens=data.get("max_tokens", 4096),
             timeout=data.get("timeout", 30),
             organization_id=data.get("organization_id"),
         )

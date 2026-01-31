@@ -89,7 +89,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Complete README with installation and usage instructions
 - Setup script for easy installation
 - Environment variable configuration template
-- Alfred workflow configuration (info.plist)
+- Raycast extension configuration
 - Inline code documentation and docstrings
 
 ### Technical Details
@@ -100,11 +100,10 @@ reminder-alf/
 ├── src/
 │   ├── models/          # Data models
 │   ├── services/        # Business logic
-│   ├── workflow/        # Alfred integration
-│   │   └── handlers/    # Command handlers
+│   ├── cli.py           # CLI interface
 │   └── utils/           # Utilities
 ├── tests/               # Test suite
-├── workflow/            # Alfred workflow config
+├── raycast-extension/   # Raycast extension
 └── specs/               # Specifications
 ```
 
@@ -117,7 +116,6 @@ reminder-alf/
 
 #### Dependencies
 - pyobjc-framework-EventKit - macOS Calendar/Reminders integration
-- alfred-workflow - Alfred workflow helpers
 - keyring - Secure credential storage
 - openai - OpenAI API client
 - anthropic - Anthropic API client
@@ -196,6 +194,6 @@ reminder-alf/
 
 ---
 
-**Contributors**: Built with ❤️ for Alfred users
+**Contributors**: Built with ❤️ for macOS users
 
 **License**: MIT License

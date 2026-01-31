@@ -15,7 +15,7 @@ logger = get_logger(__name__)
 class ConfigManager:
     """Manages AI configuration and secure credential storage."""
 
-    SERVICE_NAME = "alfred-reminder-alf"
+    SERVICE_NAME = "reminder-alf"
     KEY_API_KEY = "api_key"
 
     def __init__(self, config_dir: Optional[Path] = None):
@@ -23,14 +23,11 @@ class ConfigManager:
         Initialize ConfigManager.
 
         Args:
-            config_dir: Directory for config files (defaults to workflow data dir)
+            config_dir: Directory for config files (defaults to ~/.config/reminder-alf)
         """
         if config_dir is None:
-            # Use Alfred workflow data directory
-            config_dir = (
-                Path.home()
-                / "Library/Application Support/Alfred/Workflow Data/com.reminder-alf"
-            )
+            # Use user config directory
+            config_dir = Path.home() / ".config" / "reminder-alf"
         self.config_dir = config_dir
         self.config_file = config_dir / "config.json"
         self.config_dir.mkdir(parents=True, exist_ok=True)

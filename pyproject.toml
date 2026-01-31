@@ -1,12 +1,12 @@
 [project]
 name = "reminder-alf"
 version = "1.4.1"
-description = "AI-powered calendar and reminder management for Alfred on macOS"
+description = "AI-powered calendar and reminder management for macOS"
 authors = [{name = "Reminder-Alf Contributors"}]
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
-keywords = ["alfred", "workflow", "calendar", "reminder", "ai", "nlp", "macos", "productivity"]
+keywords = ["raycast", "cli", "calendar", "reminder", "ai", "nlp", "macos", "productivity"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: End Users/Desktop",
@@ -19,7 +19,6 @@ classifiers = [
 ]
 dependencies = [
     "pyobjc-framework-EventKit>=10.0",
-    "alfred-workflow>=1.39.0",
     "keyring>=24.0.0",
     "openai>=1.0.0",
     "httpx>=0.25.0",
@@ -27,7 +26,7 @@ dependencies = [
 ]
 
 [project.scripts]
-ral = "src.main:main"
+ral = "src.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/fulln/reminder-alf"
@@ -48,6 +47,10 @@ dev = [
 [build-system]
 requires = ["setuptools>=68.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
 
 [tool.black]
 line-length = 100

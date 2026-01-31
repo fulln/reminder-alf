@@ -2,7 +2,7 @@
 
 ## 项目概述
 
-**Reminder-Alf** 是一个功能完整的 Alfred 工作流，使用 AI 技术将自然语言（中英文）解析为 macOS 日历事件和提醒事项。
+**Reminder-Alf** 是一个功能完整的 macOS 工具，使用 AI 技术将自然语言（中英文）解析为 macOS 日历事件和提醒事项。支持 CLI 和 Raycast 扩展两种使用方式。
 
 ## ✅ 完成状态：96% (104/108 任务)
 
@@ -102,7 +102,7 @@ Layer 1: Data Models (ai_config, calendar_event, reminder, parse_result, tracker
 - **命令模式**: CommandRouter + Handlers
 - **工厂模式**: AIClient 多供应商支持
 - **仓储模式**: TrackerService 持久化
-- **构建者模式**: FeedbackBuilder Alfred 反馈
+- **构建者模式**: CLI JSON 输出
 - **策略模式**: AI 解析策略
 
 ## 🔒 安全特性
@@ -152,7 +152,7 @@ tests/
 - ✅ pyproject.toml (项目配置)
 - ✅ .ruff.toml (代码检查)
 - ✅ .gitignore (Git 忽略)
-- ✅ workflow/info.plist (Alfred 工作流配置)
+- ✅ raycast-extension/package.json (Raycast 扩展配置)
 
 ## 📈 代码统计
 
@@ -217,7 +217,7 @@ ral delete old 7
 ### 核心技术
 - **Python 3.11+** - 主要编程语言
 - **PyObjC EventKit** - macOS 日历/提醒集成
-- **alfred-workflow** - Alfred 工作流框架
+- **Raycast Extension** - Raycast 扩展框架
 - **keyring** - 安全凭证存储
 
 ### AI 集成
@@ -265,12 +265,12 @@ ral delete old 7
 - ✅ 55% 代码覆盖率
 - ✅ 零关键 Bug
 - ✅ 完整文档
-- ✅ 可分发的 Alfred 工作流
+- ✅ CLI + Raycast 扩展
 
 ## 🙏 致谢
 
 感谢以下开源项目和技术：
-- Alfred Powerpack
+- Raycast Extension Framework
 - PyObjC
 - OpenAI API
 - Anthropic Claude

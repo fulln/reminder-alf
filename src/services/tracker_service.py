@@ -12,20 +12,20 @@ logger = get_logger(__name__)
 class TrackerService:
     """Service for managing created item tracking."""
 
-    DEFAULT_STORAGE_PATH = (
-        Path.home()
-        / "Library/Application Support/Alfred/Workflow Data/com.reminder-alf/tracking.json"
-    )
+    DEFAULT_STORAGE_PATH = Path.home() / ".config" / "reminder-alf" / "tracking.json"
 
     def __init__(self, storage_path: Optional[Path] = None):
         """
         Initialize TrackerService.
 
         Args:
-            storage_path: Path to tracking file (defaults to Alfred data dir)
+            storage_path: Path to tracking file (defaults to ~/.config/reminder-alf/)
         """
         if storage_path is None:
             storage_path = self.DEFAULT_STORAGE_PATH
+        
+        # Ensure parent directory exists
+        storage_path.parent.mkdir(parents=True, exist_ok=True)
 
         self.tracker = CreatedItemTracker(storage_path)
         logger.info(f"TrackerService initialized with storage: {storage_path}")

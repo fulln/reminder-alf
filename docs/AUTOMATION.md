@@ -43,7 +43,7 @@ git commit -m "refactor: simplify config manager"
 - ✅ 从 Git commits 生成 changelog
 - ✅ 更新版本号（pyproject.toml）
 - ✅ 运行测试
-- ✅ 构建 Alfred workflow
+- ✅ 构建 Python 包
 - ✅ 提交更改
 - ✅ 创建 Git tag
 - ✅ 推送到 GitHub
@@ -52,9 +52,9 @@ git commit -m "refactor: simplify config manager"
 
 推送后，GitHub Actions 会自动：
 - ✅ 运行完整测试
-- ✅ 构建 .alfredworkflow 文件
+- ✅ 构建 Python 包
 - ✅ 创建 GitHub Release
-- ✅ 上传 workflow 文件到 Release
+- ✅ 上传文件到 Release
 
 ## Git Commit 规范
 
@@ -232,7 +232,7 @@ GitHub Actions 触发
 
 1. 进入 GitHub 仓库
 2. 点击 **Actions** 标签
-3. 选择 **Build Alfred Workflow**
+3. 选择 **Build and Release**
 4. 点击 **Run workflow**
 5. 选择分支并运行
 

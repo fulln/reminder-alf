@@ -2,7 +2,7 @@
 
 ## 自动发布流程
 
-我们使用 GitHub Actions 自动化构建和发布 Alfred 工作流包。
+我们使用 GitHub Actions 自动化构建和发布 Python 包。
 
 ### 发布新版本
 
@@ -17,9 +17,9 @@ git push origin v1.0.0
 
 # 3. GitHub Actions 会自动：
 #    - 运行测试
-#    - 生成 .alfredworkflow 文件
+#    - 构建 Python 包
 #    - 创建 GitHub Release
-#    - 上传工作流文件到 Release
+#    - 上传文件到 Release
 ```
 
 #### 2. 手动触发构建
@@ -28,11 +28,11 @@ git push origin v1.0.0
 
 1. 进入 GitHub 仓库
 2. 点击 "Actions" 标签
-3. 选择 "Build Alfred Workflow"
+3. 选择 "Build and Release"
 4. 点击 "Run workflow" 按钮
 5. 选择分支并运行
 
-工作流包会作为 artifact 提供下载，保存 30 天。
+构建产物会作为 artifact 提供下载，保存 30 天。
 
 #### 3. 自动 PR 构建
 
@@ -108,7 +108,7 @@ git push origin v1.1.0
 2. **Setup Python** - 安装 Python 3.11
 3. **Install dependencies** - 安装项目依赖
 4. **Run tests** - 运行单元测试
-5. **Build workflow** - 生成 `.alfredworkflow` 文件
+5. **Build package** - 构建 Python 包
 6. **Upload artifact** - 上传构建产物（保存 30 天）
 7. **Create Release** - 如果是 tag，创建 GitHub Release 并上传文件
 
@@ -122,7 +122,7 @@ git push origin v1.1.0
 
 自动创建的 Release 包含：
 
-- ✅ `.alfredworkflow` 可执行文件
+- ✅ Python 包文件
 - ✅ 版本号和发布时间
 - ✅ 安装说明
 - ✅ 支持的功能列表
@@ -153,18 +153,16 @@ git push origin v1.1.0
 在推送之前，在本地测试完整流程：
 
 ```bash
-# 1. 清理旧的 artifact
-rm -f Reminder-Alf.alfredworkflow
+# 1. 运行测试
+python -m pytest src/tests/ -v
 
-# 2. 运行测试
-python -m pytest tests/ -v
+# 2. 测试 CLI
+python -m src.cli help
+python -m src.cli config status
 
-# 3. 构建工作流
-python build_workflow.py
-
-# 4. 验证文件
-ls -lh Reminder-Alf.alfredworkflow
-unzip -l Reminder-Alf.alfredworkflow
+# 3. 测试 Raycast 扩展
+cd raycast-extension
+npm run dev
 ```
 
 ## 高级用法
@@ -189,4 +187,4 @@ unzip -l Reminder-Alf.alfredworkflow
 
 - [GitHub Actions 文档](https://docs.github.com/en/actions)
 - [Semantic Versioning](https://semver.org/)
-- [Alfred Workflow 格式](https://www.alfredapp.com/help/workflows/)
+- [Raycast Extension 文档](https://developers.raycast.com/)

@@ -12,7 +12,7 @@ reminder-alf/
 │
 ├── 📚 docs/ - 详细文档目录
 │   ├── QUICKSTART.md               # 5分钟快速开始
-│   ├── INSTALL_ALFRED.md           # 详细安装指南
+│   ├── INSTALL_RAYCAST.md          # Raycast 扩展安装指南
 │   ├── DEEPSEEK.md                 # DeepSeek 配置指南
 │   ├── DEVELOPMENT.md              # 开发者文档
 │   ├── AUTOMATION.md               # 自动化工作流说明
@@ -22,7 +22,6 @@ reminder-alf/
 │   └── CLAUDE.md                   # Claude AI 相关说明
 │
 ├── 🛠️ scripts/ - 脚本工具
-│   ├── build_workflow.py           # 构建 Alfred 工作流包
 │   ├── release.sh                  # 一键自动发布脚本
 │   ├── quick-install.sh            # 一键安装脚本
 │   └── setup.sh                    # 开发环境设置
@@ -37,8 +36,12 @@ reminder-alf/
 │   └── src/                        # Python 源代码
 │       ├── models/                 # 数据模型
 │       ├── services/               # 业务逻辑服务
-│       ├── workflow/               # Alfred 工作流
+│       ├── cli.py                  # CLI 命令行工具
 │       └── utils/                  # 工具函数
+│
+├── 🌟 raycast-extension/          # Raycast 扩展
+│   ├── src/                        # TypeScript 源代码
+│   └── package.json                # Node.js 配置
 │
 ├── 🧪 tests/                       # 测试代码
 │   ├── fixtures/                   # 测试数据
@@ -47,16 +50,9 @@ reminder-alf/
 ├── 📋 specs/                       # 产品规范文档
 │   └── 001-ai-calendar-reminder/   # 项目规范
 │
-├── 🔧 workflow/                    # Alfred 工作流配置
-│   ├── info.plist                  # 工作流配置文件
-│   └── run_script.py               # 工作流入口脚本
-│
-├── ⚙️ .github/                     # GitHub 配置
-│   └── workflows/
-│       └── build-workflow.yml      # CI/CD 配置
-│
-└── 📦 产物
-    └── Reminder-Alf.alfredworkflow # 最终 Alfred 工作流包
+└── ⚙️ .github/                     # GitHub 配置
+    └── workflows/
+        └── release.yml             # CI/CD 配置
 
 ```
 
@@ -66,7 +62,7 @@ reminder-alf/
 
 1. 开始：[README.md](../README.md) - 项目介绍
 2. 安装：[docs/QUICKSTART.md](QUICKSTART.md) - 5分钟快速开始
-3. 详细：[docs/INSTALL_ALFRED.md](INSTALL_ALFRED.md) - 完整安装指南
+3. Raycast：[docs/INSTALL_RAYCAST.md](INSTALL_RAYCAST.md) - Raycast 扩展安装
 4. DeepSeek：[docs/DEEPSEEK.md](DEEPSEEK.md) - 中文 AI 配置
 
 ### 👨‍💻 开发者
@@ -87,13 +83,10 @@ reminder-alf/
 
 ```bash
 # 安装
-bash scripts/quick-install.sh
+python3.11 -m pip install -e .
 
 # 测试
-python3 -m pytest tests/
-
-# 构建
-python3 scripts/build_workflow.py
+python3 -m pytest src/tests/
 
 # 代码检查
 ruff check src/
@@ -120,8 +113,8 @@ black src/ --check
 
 从原始结构迁移的文件：
 
-- ✅ 文档文件移至 `docs/`：QUICKSTART.md, INSTALL_ALFRED.md, DEEPSEEK.md, DEVELOPMENT.md, AUTOMATION.md, RELEASE.md, STRUCTURE.md, PROJECT_SUMMARY_CN.md, CLAUDE.md
-- ✅ 脚本文件移至 `scripts/`：build_workflow.py, release.sh, quick-install.sh, setup.sh
+- ✅ 文档文件移至 `docs/`：QUICKSTART.md, INSTALL_RAYCAST.md, DEEPSEEK.md, DEVELOPMENT.md, AUTOMATION.md, RELEASE.md, STRUCTURE.md, PROJECT_SUMMARY_CN.md, CLAUDE.md
+- ✅ 脚本文件移至 `scripts/`：release.sh, quick-install.sh, setup.sh
 - ✅ 核心文件保留根目录：README.md, LICENSE, CHANGELOG.md, CONTRIBUTING.md
 
 ## 优势
