@@ -112,11 +112,17 @@ class EventKitBridge:
             return False, None, "Invalid event data"
 
         try:
+            from Foundation import NSDate
+            
+            # Helper to convert Python datetime to NSDate
+            def to_nsdate(dt: datetime) -> NSDate:
+                return NSDate.dateWithTimeIntervalSince1970_(dt.timestamp())
+            
             # Create EKEvent
             ek_event = EventKit.EKEvent.eventWithEventStore_(self.event_store)
             ek_event.setTitle_(event.title)
-            ek_event.setStartDate_(event.start_date)
-            ek_event.setEndDate_(event.end_date)
+            ek_event.setStartDate_(to_nsdate(event.start_date))
+            ek_event.setEndDate_(to_nsdate(event.end_date))
 
             if event.location:
                 ek_event.setLocation_(event.location)
@@ -201,7 +207,11 @@ class EventKitBridge:
 
             # Set due date
             if reminder.due_date:
-                from Foundation import NSCalendar, NSDateComponents
+                from Foundation import NSCalendar, NSDateComponents, NSDate
+                
+                # Convert Python datetime to NSDate first
+                ns_due_date = NSDate.dateWithTimeIntervalSince1970_(reminder.due_date.timestamp())
+                
                 calendar = NSCalendar.currentCalendar()
                 components = calendar.components_fromDate_(
                     EventKit.NSCalendarUnitYear
@@ -209,7 +219,7 @@ class EventKitBridge:
                     | EventKit.NSCalendarUnitDay
                     | EventKit.NSCalendarUnitHour
                     | EventKit.NSCalendarUnitMinute,
-                    reminder.due_date,
+                    ns_due_date,
                 )
                 ek_reminder.setDueDateComponents_(components)
 

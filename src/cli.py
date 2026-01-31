@@ -90,7 +90,7 @@ def handle_parse(args, as_json: bool) -> dict:
     """Handle parse command."""
     from .services.config_manager import ConfigManager
     from .services.parse_service import ParseService
-    from .services.eventkit_bridge import EventKitBridge
+    from .services.applescript_bridge import AppleScriptBridge
     
     text = " ".join(args.text)
     
@@ -107,10 +107,10 @@ def handle_parse(args, as_json: bool) -> dict:
         if result.errors:
             return {"success": False, "error": result.errors[0]}
         
-        # Create items in system
-        eventkit_bridge = EventKitBridge()
+        # Create items in system using AppleScript
+        bridge = AppleScriptBridge()
         events_created, reminders_created, errors = parse_service.create_items_from_parse(
-            result, eventkit_bridge
+            result, bridge
         )
         
         items = []
